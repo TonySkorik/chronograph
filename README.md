@@ -27,13 +27,13 @@ Following is the example of the extended `Chronograph` output.
 
 ```csharp
 [16:28:38 INF] Started getting products with batch size of 100.
-[16:34:03 INF] Finished getting products with batch size of 100. Got 65536 products from FCAT. [0:05:25.3627059]
+[16:34:03 INF] Finished getting products with batch size of 100. Got 65536 products. [0:05:25.3627059]
 ```
 
 Where:
 * The *action description* is `getting products with batch size of {batchSize}`.
 * The *action description* template parameter is `100`.
-* The *end action report message* is `Got {productsCount} products from FCAT`.
+* The *end action report message* is `Got {productsCount} products from `.
 * The *end action report message parameter* is `65536`. These parameters got calculated after operation completes.
 * The *operation duration* is `[0:05:25.3627059]`
 
