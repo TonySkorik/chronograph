@@ -1,6 +1,4 @@
-﻿# CnetContent.Bootstrapper.Serilog.Diagnostics
-
-This namespace provides extension methods and classes for `Chronograph` creation.
+﻿# Diagnostics.Chronograph
 
 `Chronograph` is an instrumentation object which encapsulates `Stopwatch` instance and serilog parametrized messages for operation start and end reporting. 
 
@@ -17,23 +15,23 @@ The general pattern of the `Chronograph` output is :
 Following is the example output during the simple (without end action message) `Chronograph` lifetime.
 
 ```csharp
-[16:28:38 INF] Started getting FCAT products.
-[16:34:03 INF] Finished getting FCAT products. [0:05:25.3627059]
+[16:28:38 INF] Started getting products.
+[16:34:03 INF] Finished getting products. [0:05:25.3627059]
 ```
 
 Where:
-* The *action description* is `getting FCAT products`
+* The *action description* is `getting products`
 * The *operation duration* is `[0:05:25.3627059]`
 
 Following is the example of the extended `Chronograph` output.
 
 ```csharp
-[16:28:38 INF] Started getting FCAT products with batch size of 100.
-[16:34:03 INF] Finished getting FCAT products with batch size of 100. Got 65536 products from FCAT. [0:05:25.3627059]
+[16:28:38 INF] Started getting products with batch size of 100.
+[16:34:03 INF] Finished getting products with batch size of 100. Got 65536 products from FCAT. [0:05:25.3627059]
 ```
 
 Where:
-* The *action description* is `getting FCAT products with batch size of {batchSize}`.
+* The *action description* is `getting products with batch size of {batchSize}`.
 * The *action description* template parameter is `100`.
 * The *end action report message* is `Got {productsCount} products from FCAT`.
 * The *end action report message parameter* is `65536`. These parameters got calculated after operation completes.
