@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<AssemblyName>Diagnostics.Chronograph.Serilog</AssemblyName>
+		<RootNamespace>Diagnostics.Chronograph.Serilog</RootNamespace>
+		<Description>This library provides Serilog logger integration logic for Chronograph.</Description>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<LangVersion>latest</LangVersion>
+		<ImplicitUsings>true</ImplicitUsings>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Serilog" Version="2.11.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Chronograph.Core\Chronograph.Core.csproj" />
+	</ItemGroup>
+
+</Project>

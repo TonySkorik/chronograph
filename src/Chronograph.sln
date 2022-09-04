@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chronograph.Core", "Chronograph.Core\Chronograph.Core.csproj", "{2013DA15-836D-45EE-AAB9-B378610971D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chronograph.Serilog", "Chronograph.Serilog\Chronograph.Serilog.csproj", "{9937C820-E22C-46AF-875E-75704CB26F10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chronograph.Microsoft.Extensions.Logging", "Chronograph.Microsoft.Extensions.Logging\Chronograph.Microsoft.Extensions.Logging.csproj", "{6A3DF79E-1DF5-4EAB-A318-DB8F5487C694}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00. Core", "00. Core", "{EC7E25E6-5020-497C-A715-70B9F675D637}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01. Loggers", "01. Loggers", "{6E659C37-39F0-49F9-AEF2-A71953430649}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02. Tests", "02. Tests", "{E906711F-8761-46C3-A5DE-020EF4F02DB9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chronograph.Tests", "Chronograph.Tests\Chronograph.Tests.csproj", "{975D6700-293E-4FAD-B6FF-FC55ACD85B38}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2013DA15-836D-45EE-AAB9-B378610971D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2013DA15-836D-45EE-AAB9-B378610971D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2013DA15-836D-45EE-AAB9-B378610971D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2013DA15-836D-45EE-AAB9-B378610971D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9937C820-E22C-46AF-875E-75704CB26F10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9937C820-E22C-46AF-875E-75704CB26F10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9937C820-E22C-46AF-875E-75704CB26F10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9937C820-E22C-46AF-875E-75704CB26F10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A3DF79E-1DF5-4EAB-A318-DB8F5487C694}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A3DF79E-1DF5-4EAB-A318-DB8F5487C694}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A3DF79E-1DF5-4EAB-A318-DB8F5487C694}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A3DF79E-1DF5-4EAB-A318-DB8F5487C694}.Release|Any CPU.Build.0 = Release|Any CPU
+		{975D6700-293E-4FAD-B6FF-FC55ACD85B38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{975D6700-293E-4FAD-B6FF-FC55ACD85B38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{975D6700-293E-4FAD-B6FF-FC55ACD85B38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{975D6700-293E-4FAD-B6FF-FC55ACD85B38}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2013DA15-836D-45EE-AAB9-B378610971D0} = {EC7E25E6-5020-497C-A715-70B9F675D637}
+		{9937C820-E22C-46AF-875E-75704CB26F10} = {6E659C37-39F0-49F9-AEF2-A71953430649}
+		{6A3DF79E-1DF5-4EAB-A318-DB8F5487C694} = {6E659C37-39F0-49F9-AEF2-A71953430649}
+		{975D6700-293E-4FAD-B6FF-FC55ACD85B38} = {E906711F-8761-46C3-A5DE-020EF4F02DB9}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {12EE3CC4-0A22-4621-B8F4-D7D34501CACE}
+	EndGlobalSection
+EndGlobal
