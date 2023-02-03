@@ -19,11 +19,11 @@ public static class MicrosoftExtensionsLoggerHelper
 	/// </summary>
 	/// <param name="targetLogger">The target logger.</param>
 	/// <remarks>The returned chronograph is <c>not started by default</c> so you need to call <c>Start()</c> method explicitly upon build completion.</remarks>
-	public static global::Diagnostics.Chronograph.Core.Chronograph Chrono(this ILogger targetLogger)
+	public static Core.Chronograph Chrono(this ILogger targetLogger)
 	{
 		var microsoftExtensionsChronoLogger = new MicrosoftExtensionsChronographLogger(targetLogger);
 
-		return global::Diagnostics.Chronograph.Core.Chronograph.Create(microsoftExtensionsChronoLogger)
+		return Core.Chronograph.Create(microsoftExtensionsChronoLogger)
 			.WithEventLevel(DefaultChronographEventLevel);
 	}
 
@@ -33,11 +33,11 @@ public static class MicrosoftExtensionsLoggerHelper
 	/// <param name="targetLogger">The target logger.</param>
 	/// <param name="actionDescription">The action description.</param>
 	/// <remarks>The returned chronograph is <c>started by default</c>.</remarks>
-	public static global::Diagnostics.Chronograph.Core.Chronograph Chrono(this ILogger targetLogger, string actionDescription)
+	public static Core.Chronograph Chrono(this ILogger targetLogger, string actionDescription)
 	{
 		var microsoftExtensionsChronoLogger = new MicrosoftExtensionsChronographLogger(targetLogger);
 
-		return global::Diagnostics.Chronograph.Core.Chronograph.Create(microsoftExtensionsChronoLogger)
+		return Core.Chronograph.Create(microsoftExtensionsChronoLogger)
 			.WithEventLevel(DefaultChronographEventLevel)
 			.For(actionDescription)
 			.Start();
