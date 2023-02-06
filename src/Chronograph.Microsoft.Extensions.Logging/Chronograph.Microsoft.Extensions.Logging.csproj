@@ -2,8 +2,8 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<AssemblyName>DiagnosticExtensions.Chronograph.Microsoft.Extensions.Logging</AssemblyName>
-		<RootNamespace>DiagnosticExtensions.Chronograph.Microsoft.Extensions.Logging</RootNamespace>
+		<AssemblyName>Chronograph.Microsoft.Extensions.Logging</AssemblyName>
+		<RootNamespace>Chronograph.Microsoft.Extensions.Logging</RootNamespace>
 		<Description>This library provides Microsoft.Extensions.Logging logger integration logic for Chronograph.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>latest</LangVersion>

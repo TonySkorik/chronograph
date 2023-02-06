@@ -1,9 +1,9 @@
-﻿using DiagnosticExtensions.Chronograph.Core.Logging;
-using DiagnosticExtensions.Chronograph.Microsoft.Extensions.Logging.Logging;
+﻿using Chronograph.Core.Logging;
+using Chronograph.Microsoft.Extensions.Logging.Logging;
 
 using Microsoft.Extensions.Logging;
 
-namespace DiagnosticExtensions.Chronograph.Microsoft.Extensions.Logging.Helpers;
+namespace Chronograph.Microsoft.Extensions.Logging.Helpers;
 
 /// <summary>
 /// Helper class for creating chronographs for Microsoft.Extensions.Logging logger.

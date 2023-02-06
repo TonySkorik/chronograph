@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Text;
 
-using DiagnosticExtensions.Chronograph.Core.Infrastructure;
-using DiagnosticExtensions.Chronograph.Core.Logging;
+using Chronograph.Core.Infrastructure;
+using Chronograph.Core.Logging;
 
-namespace DiagnosticExtensions.Chronograph.Core;
+namespace Chronograph.Core;
 
 /// <summary>
 /// Represents chronograph which writes operation timing information to serilog.

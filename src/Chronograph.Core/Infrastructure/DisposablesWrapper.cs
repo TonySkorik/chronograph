@@ -1,4 +1,4 @@
-﻿namespace DiagnosticExtensions.Chronograph.Core.Infrastructure;
+﻿namespace Chronograph.Core.Infrastructure;
 
 internal class DisposablesWrapper : IDisposable
 {

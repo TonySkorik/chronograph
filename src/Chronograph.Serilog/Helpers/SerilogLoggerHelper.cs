@@ -1,9 +1,9 @@
-﻿using DiagnosticExtensions.Chronograph.Core.Logging;
-using DiagnosticExtensions.Chronograph.Serilog.Logging;
+﻿using Chronograph.Core.Logging;
+using Chronograph.Serilog.Logging;
 
 using Serilog;
 
-namespace DiagnosticExtensions.Chronograph.Serilog.Helpers;
+namespace Chronograph.Serilog.Helpers;
 
 /// <summary>
 /// Helper class for creating chronographs for Serilog logger.

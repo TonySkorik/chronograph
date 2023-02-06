@@ -1,7 +1,6 @@
-﻿using Chronograph.Tests.Mocks;
-
-using DiagnosticExtensions.Chronograph.Core.Logging;
-using DiagnosticExtensions.Chronograph.Microsoft.Extensions.Logging.Helpers;
+﻿using Chronograph.Core.Logging;
+using Chronograph.Microsoft.Extensions.Logging.Helpers;
+using Chronograph.Tests.Mocks;
 
 using FluentAssertions;
 

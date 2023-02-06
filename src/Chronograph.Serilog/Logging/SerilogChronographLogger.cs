@@ -1,10 +1,10 @@
-﻿using DiagnosticExtensions.Chronograph.Core.Logging;
+﻿using Chronograph.Core.Logging;
 
 using Serilog;
 using Serilog.Context;
 using Serilog.Events;
 
-namespace DiagnosticExtensions.Chronograph.Serilog.Logging;
+namespace Chronograph.Serilog.Logging;
 
 internal class SerilogChronographLogger : IChronographLogger
 {

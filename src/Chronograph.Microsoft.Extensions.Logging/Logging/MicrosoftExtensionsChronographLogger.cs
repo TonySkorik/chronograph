@@ -1,8 +1,8 @@
-﻿using DiagnosticExtensions.Chronograph.Core.Logging;
+﻿using Chronograph.Core.Logging;
 
 using Microsoft.Extensions.Logging;
 
-namespace DiagnosticExtensions.Chronograph.Microsoft.Extensions.Logging.Logging;
+namespace Chronograph.Microsoft.Extensions.Logging.Logging;
 
 internal class MicrosoftExtensionsChronographLogger : IChronographLogger
 {
