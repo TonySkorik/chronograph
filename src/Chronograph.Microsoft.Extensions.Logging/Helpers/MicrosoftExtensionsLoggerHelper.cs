@@ -29,7 +29,21 @@ public static class MicrosoftExtensionsLoggerHelper
 	}
 
 	/// <summary>
-	/// Creates the simple chronograph for a non-parameterized acton description.
+	/// Creates the stopped chronograph. Used to build chronograph using fluent interface.
+	/// </summary>
+	/// <param name="targetLogger">The target logger.</param>
+	/// <param name="chronographEventLevel">The chronograph log messages event level.</param>
+	/// <remarks>The returned chronograph is <c>not started by default</c> so you need to call <c>Start()</c> method explicitly upon build completion.</remarks>
+	public static Core.Chronograph Chrono(this ILogger targetLogger, ChronographLoggerEventLevel chronographEventLevel)
+	{
+		var microsoftExtensionsChronoLogger = new MicrosoftExtensionsChronographLogger(targetLogger);
+
+		return Core.Chronograph.Create(microsoftExtensionsChronoLogger)
+			.WithEventLevel(chronographEventLevel);
+	}
+
+	/// <summary>
+	/// Creates the running chronograph for a non-parameterized acton description.
 	/// </summary>
 	/// <param name="targetLogger">The target logger.</param>
 	/// <param name="actionDescription">The action description.</param>
@@ -40,6 +54,26 @@ public static class MicrosoftExtensionsLoggerHelper
 
 		return Core.Chronograph.Create(microsoftExtensionsChronoLogger)
 			.WithEventLevel(DefaultChronographEventLevel)
+			.For(actionDescription)
+			.Start();
+	}
+
+	/// <summary>
+	/// Creates the running chronograph for a non-parameterized acton description.
+	/// </summary>
+	/// <param name="targetLogger">The target logger.</param>
+	/// <param name="actionDescription">The action description.</param>
+	/// <param name="chronographEventLevel">The chronograph log messages event level.</param>
+	/// <remarks>The returned chronograph is <c>started by default</c>.</remarks>
+	public static Core.Chronograph Chrono(
+		this ILogger targetLogger, 
+		string actionDescription, 
+		ChronographLoggerEventLevel chronographEventLevel)
+	{
+		var microsoftExtensionsChronoLogger = new MicrosoftExtensionsChronographLogger(targetLogger);
+
+		return Core.Chronograph.Create(microsoftExtensionsChronoLogger)
+			.WithEventLevel(chronographEventLevel)
 			.For(actionDescription)
 			.Start();
 	}

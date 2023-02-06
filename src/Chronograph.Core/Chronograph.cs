@@ -33,7 +33,7 @@ public class Chronograph : IDisposable
 	/// </summary>
 	/// <param name="logger">The logger.</param>
 	/// <param name="eventLevel">The event level.</param>
-	protected Chronograph(IChronographLogger logger, ChronographLoggerEventLevel eventLevel)
+	protected internal Chronograph(IChronographLogger logger, ChronographLoggerEventLevel eventLevel)
 	{
 		_stopwatch = Stopwatch.StartNew();
 		_logger = logger;
@@ -44,7 +44,7 @@ public class Chronograph : IDisposable
 	/// Creates empty and not started chronograph. Used for Chronograph fluent builder methods.
 	/// </summary>
 	/// <param name="logger">The target logger chronograph will log to.</param>
-	protected Chronograph(IChronographLogger logger)
+	protected internal Chronograph(IChronographLogger logger)
 	{
 		_logger = logger;
 		_stopwatch = new Stopwatch();
@@ -67,7 +67,7 @@ public class Chronograph : IDisposable
 	/// }
 	/// </c>
 	/// </example>
-	protected Chronograph(
+	protected internal Chronograph(
 		IChronographLogger logger,
 		string actionDescription,
 		ChronographLoggerEventLevel eventLevel,
@@ -106,7 +106,7 @@ public class Chronograph : IDisposable
 	/// }
 	/// </c>
 	/// </example>
-	protected Chronograph(
+	protected internal Chronograph(
 		IChronographLogger logger,
 		string actionDescription,
 		ChronographLoggerEventLevel eventLevel,

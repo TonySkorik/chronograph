@@ -29,7 +29,21 @@ public static class SerilogLoggerHelper
 	}
 
 	/// <summary>
-	/// Creates the simple chronograph for a non-parameterized acton description.
+	/// Creates the stopped chronograph. Used to build chronograph using fluent interface.
+	/// </summary>
+	/// <param name="targetLogger">The target logger.</param>
+	/// <param name="chronographEventLevel">The chronograph log messages event level.</param>
+	/// <remarks>The returned chronograph is <c>not started by default</c> so you need to call <c>Start()</c> method explicitly upon build completion.</remarks>
+	public static Core.Chronograph Chrono(this ILogger targetLogger, ChronographLoggerEventLevel chronographEventLevel)
+	{
+		var serilogChronoLogger = new SerilogChronographLogger(targetLogger);
+
+		return Core.Chronograph.Create(serilogChronoLogger)
+			.WithEventLevel(chronographEventLevel);
+	}
+
+	/// <summary>
+	/// Creates the running chronograph for a non-parameterized acton description.
 	/// </summary>
 	/// <param name="targetLogger">The target logger.</param>
 	/// <param name="atcionDescription">The action description.</param>
@@ -40,6 +54,26 @@ public static class SerilogLoggerHelper
 
 		return Core.Chronograph.Create(serilogChronoLogger)
 			.WithEventLevel(DefaultChronographEventLevel)
+			.For(atcionDescription)
+			.Start();
+	}
+
+	/// <summary>
+	/// Creates the running chronograph for a non-parameterized acton description.
+	/// </summary>
+	/// <param name="targetLogger">The target logger.</param>
+	/// <param name="atcionDescription">The action description.</param>
+	/// <param name="chronographEventLevel">The chronograph log messages event level.</param>
+	/// <remarks>The returned chronograph is <c>started by default</c>.</remarks>
+	public static Core.Chronograph Chrono(
+		this ILogger targetLogger, 
+		string atcionDescription, 
+		ChronographLoggerEventLevel chronographEventLevel)
+	{
+		var serilogChronoLogger = new SerilogChronographLogger(targetLogger);
+
+		return Core.Chronograph.Create(serilogChronoLogger)
+			.WithEventLevel(chronographEventLevel)
 			.For(atcionDescription)
 			.Start();
 	}
