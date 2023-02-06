@@ -1,4 +1,4 @@
-﻿# Diagnostics.Chronograph
+﻿# Chronograph
 
 `Chronograph` is an instrumentation object which encapsulates `Stopwatch` instance and serilog parametrized messages for operation start and end reporting. 
 
