@@ -218,6 +218,7 @@ public class Chronograph : IDisposable
 		{
 			_logger.Write(_eventLevel, $"Started {_actionDescription}.");
 		}
+
 		_stopwatch.Start();
 
 		return this;
