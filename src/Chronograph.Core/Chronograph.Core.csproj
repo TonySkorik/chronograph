@@ -2,8 +2,8 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<AssemblyName>Diagnostics.Chronograph.Core</AssemblyName>
-		<RootNamespace>Diagnostics.Chronograph.Core</RootNamespace>
+		<AssemblyName>DiagnosticExtensions.Chronograph.Core</AssemblyName>
+		<RootNamespace>DiagnosticExtensions.Chronograph.Core</RootNamespace>
 		<Description>This library provides Chronograph class core functionality. Chronograph is a library for convenient opertaions timing via `using` constructs and fluent syntax.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>latest</LangVersion>

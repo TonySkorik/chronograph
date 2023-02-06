@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Diagnostics.Chronograph.Core.Infrastructure;
-using Diagnostics.Chronograph.Core.Logging;
 
-namespace Diagnostics.Chronograph.Core;
+using DiagnosticExtensions.Chronograph.Core.Infrastructure;
+using DiagnosticExtensions.Chronograph.Core.Logging;
+
+namespace DiagnosticExtensions.Chronograph.Core;
 
 /// <summary>
 /// Represents chronograph which writes operation timing information to serilog.
@@ -22,11 +23,11 @@ public class Chronograph : IDisposable
 	private string _actionDescription;
 	private string _endActionMessageTemplate;
 	private Func<object>[] _countProviders;
-		
+
 	#endregion
 
 	#region Ctor
-		
+
 	/// <summary>
 	/// Initializes a new instance of the <see cref="Chronograph"/> class.
 	/// </summary>
@@ -50,7 +51,7 @@ public class Chronograph : IDisposable
 		_eventLevel = ChronographLoggerEventLevel.Information;
 		_actionDescription = string.Empty;
 	}
-		
+
 	/// <summary>
 	/// Initializes a new instance of the <see cref="Chronograph"/> class.
 	/// </summary>
@@ -76,7 +77,7 @@ public class Chronograph : IDisposable
 		{
 			_actionDescriptionParameters.AddRange(actionDescriptionParameters);
 		}
-			
+
 		_actionDescription = PrepareActionDescription(actionDescription);
 
 		if (actionDescriptionParameters != null)
@@ -137,7 +138,7 @@ public class Chronograph : IDisposable
 	public Chronograph WithEventLevel(ChronographLoggerEventLevel logEventLevel)
 	{
 		_eventLevel = logEventLevel;
-			
+
 		return this;
 	}
 
@@ -149,7 +150,7 @@ public class Chronograph : IDisposable
 	public Chronograph WithParameter(string name, object value)
 	{
 		_parameters[name] = value;
-			
+
 		return this;
 	}
 
@@ -163,10 +164,10 @@ public class Chronograph : IDisposable
 		{
 			_parameters[parameterKv.Key] = parameterKv.Value;
 		}
-			
+
 		return this;
 	}
-		
+
 	/// <summary>
 	/// Adds action description which will be used to report start and an end. Optionally specifies action description serilog template parameters.
 	/// </summary>
@@ -179,7 +180,7 @@ public class Chronograph : IDisposable
 		{
 			_actionDescriptionParameters.AddRange(parameters);
 		}
-			
+
 		return this;
 	}
 
@@ -192,7 +193,7 @@ public class Chronograph : IDisposable
 	{
 		_endActionMessageTemplate = endMessageTemplate;
 		_countProviders = countProviders;
-			
+
 		return this;
 	}
 
@@ -201,7 +202,7 @@ public class Chronograph : IDisposable
 	/// </summary>
 	/// <param name="actionDescriptionTemplate">The action description message template.</param>
 	/// <param name="parameters">The action description message template serilog parameters.</param>
-	public Chronograph Start(string actionDescriptionTemplate, params object[] parameters) 
+	public Chronograph Start(string actionDescriptionTemplate, params object[] parameters)
 		=> For(actionDescriptionTemplate, parameters).Start();
 
 	/// <summary>
@@ -218,7 +219,7 @@ public class Chronograph : IDisposable
 			_logger.Write(_eventLevel, $"Started {_actionDescription}.");
 		}
 		_stopwatch.Start();
-			
+
 		return this;
 	}
 
@@ -250,7 +251,7 @@ public class Chronograph : IDisposable
 		_stopwatch.Stop();
 
 		WithParameter("OperationDurationMilliseceonds", _stopwatch.Elapsed.TotalMilliseconds);
-			
+
 		using (new DisposablesWrapper(PushParameters()))
 		{
 			var elapsedString = _stopwatch.Elapsed.ToString("g");
@@ -262,7 +263,7 @@ public class Chronograph : IDisposable
 				var counts = _countProviders.Select(TryInvokeCountProvider).Where(c => c != null);
 				actionDescriptionParameters.AddRange(counts);
 			}
-				
+
 			actionDescriptionParameters.Add(elapsedString);
 
 			string finalTemplate = string.IsNullOrWhiteSpace(_endActionMessageTemplate)

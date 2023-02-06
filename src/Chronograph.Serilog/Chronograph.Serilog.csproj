@@ -2,8 +2,8 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<AssemblyName>Diagnostics.Chronograph.Serilog</AssemblyName>
-		<RootNamespace>Diagnostics.Chronograph.Serilog</RootNamespace>
+		<AssemblyName>DiagnosticExtensions.Chronograph.Serilog</AssemblyName>
+		<RootNamespace>DiagnosticExtensions.Chronograph.Serilog</RootNamespace>
 		<Description>This library provides Serilog logger integration logic for Chronograph.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>latest</LangVersion>

@@ -1,9 +1,10 @@
-﻿using Diagnostics.Chronograph.Core.Logging;
+﻿using DiagnosticExtensions.Chronograph.Core.Logging;
+
 using Serilog;
 using Serilog.Context;
 using Serilog.Events;
 
-namespace Diagnostics.Chronograph.Serilog.Logging;
+namespace DiagnosticExtensions.Chronograph.Serilog.Logging;
 
 internal class SerilogChronographLogger : IChronographLogger
 {
@@ -26,7 +27,7 @@ internal class SerilogChronographLogger : IChronographLogger
 		_logger.Write(ToTargetEventLevel(level), messageTemplate, propertyValues);
 	}
 
-	public IDisposable PushProperty(string propertyName, object propertyValue) 
+	public IDisposable PushProperty(string propertyName, object propertyValue)
 		=> LogContext.PushProperty(propertyName, propertyValue);
 
 	private static LogEventLevel ToTargetEventLevel(ChronographLoggerEventLevel abastractEventLevel) =>

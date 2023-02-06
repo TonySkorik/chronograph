@@ -1,4 +1,4 @@
-﻿namespace Diagnostics.Chronograph.Core.Logging;
+﻿namespace DiagnosticExtensions.Chronograph.Core.Logging;
 
 /// <summary>
 /// Common interface for all Chronograph underlying loggers

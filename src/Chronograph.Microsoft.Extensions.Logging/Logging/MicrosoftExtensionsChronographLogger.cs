@@ -1,7 +1,8 @@
-﻿using Diagnostics.Chronograph.Core.Logging;
+﻿using DiagnosticExtensions.Chronograph.Core.Logging;
+
 using Microsoft.Extensions.Logging;
 
-namespace Diagnostics.Chronograph.Microsoft.Extensions.Logging.Logging;
+namespace DiagnosticExtensions.Chronograph.Microsoft.Extensions.Logging.Logging;
 
 internal class MicrosoftExtensionsChronographLogger : IChronographLogger
 {
@@ -24,7 +25,7 @@ internal class MicrosoftExtensionsChronographLogger : IChronographLogger
 		_logger.Log(ToTargetEventLevel(level), messageTemplate, propertyValues);
 	}
 
-	public IDisposable PushProperty(string propertyName, object propertyValue) 
+	public IDisposable PushProperty(string propertyName, object propertyValue)
 		// ReSharper disable once TemplateIsNotCompileTimeConstantProblem
 		=> _logger.BeginScope(propertyName, propertyValue);
 

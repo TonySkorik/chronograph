@@ -1,8 +1,12 @@
 using Chronograph.Tests.Mocks;
-using Diagnostics.Chronograph.Core.Logging;
-using Diagnostics.Chronograph.Serilog.Helpers;
+
+using DiagnosticExtensions.Chronograph.Core.Logging;
+using DiagnosticExtensions.Chronograph.Serilog.Helpers;
+
 using FluentAssertions;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using Serilog.Events;
 
 namespace Chronograph.Tests;

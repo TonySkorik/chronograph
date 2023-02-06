@@ -1,8 +1,9 @@
-﻿using Diagnostics.Chronograph.Core.Logging;
-using Diagnostics.Chronograph.Serilog.Logging;
+﻿using DiagnosticExtensions.Chronograph.Core.Logging;
+using DiagnosticExtensions.Chronograph.Serilog.Logging;
+
 using Serilog;
 
-namespace Diagnostics.Chronograph.Serilog.Helpers;
+namespace DiagnosticExtensions.Chronograph.Serilog.Helpers;
 
 /// <summary>
 /// Helper class for creating chronographs for Serilog logger.
@@ -19,11 +20,11 @@ public static class SerilogLoggerHelper
 	/// </summary>
 	/// <param name="targetLogger">The target logger.</param>
 	/// <remarks>The returned chronograph is <c>not started by default</c> so you need to call <c>Start()</c> method explicitly upon build completion.</remarks>
-	public static global::Diagnostics.Chronograph.Core.Chronograph Chrono(this ILogger targetLogger)
+	public static Core.Chronograph Chrono(this ILogger targetLogger)
 	{
 		var serilogChronoLogger = new SerilogChronographLogger(targetLogger);
 
-		return global::Diagnostics.Chronograph.Core.Chronograph.Create(serilogChronoLogger)
+		return Core.Chronograph.Create(serilogChronoLogger)
 			.WithEventLevel(DefaultChronographEventLevel);
 	}
 
@@ -33,11 +34,11 @@ public static class SerilogLoggerHelper
 	/// <param name="targetLogger">The target logger.</param>
 	/// <param name="atcionDescription">The action description.</param>
 	/// <remarks>The returned chronograph is <c>started by default</c>.</remarks>
-	public static global::Diagnostics.Chronograph.Core.Chronograph Chrono(this ILogger targetLogger, string atcionDescription)
+	public static Core.Chronograph Chrono(this ILogger targetLogger, string atcionDescription)
 	{
 		var serilogChronoLogger = new SerilogChronographLogger(targetLogger);
 
-		return global::Diagnostics.Chronograph.Core.Chronograph.Create(serilogChronoLogger)
+		return Core.Chronograph.Create(serilogChronoLogger)
 			.WithEventLevel(DefaultChronographEventLevel)
 			.For(atcionDescription)
 			.Start();
