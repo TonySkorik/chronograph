@@ -12,7 +12,8 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>true</ImplicitUsings>
-		<Version>1.0.2</Version>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<Version>1.0.3</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
