@@ -282,7 +282,7 @@ public class Chronograph : IDisposable
 
 	#region Service methods
 
-	protected object TryInvokeCountProvider(Func<object> provider)
+	private object TryInvokeCountProvider(Func<object> provider)
 	{
 		try
 		{
@@ -294,7 +294,7 @@ public class Chronograph : IDisposable
 		}
 	}
 
-	protected List<IDisposable> PushParameters()
+	private List<IDisposable> PushParameters()
 	{
 		var ret = new List<IDisposable>();
 		if (_parameters.Count != 0)
@@ -308,7 +308,7 @@ public class Chronograph : IDisposable
 		return ret;
 	}
 
-	protected string PrepareActionDescription(string actionDescription)
+	private string PrepareActionDescription(string actionDescription)
 	{
 		if (string.IsNullOrEmpty(actionDescription))
 		{

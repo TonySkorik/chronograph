@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
@@ -13,11 +13,17 @@
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>true</ImplicitUsings>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<Version>1.0.3</Version>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Version>1.0.4</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
 	  <Folder Include="Infrastructure\" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
 	</ItemGroup>
 
 </Project>
