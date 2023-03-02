@@ -24,6 +24,26 @@ public class Chronograph : IDisposable
 	private string _endActionMessageTemplate;
 	private Func<object>[] _countProviders;
 
+	/// <summary>
+	/// Gets the total elapsed time measured by the current chronograph instance's stopwatch.
+	/// </summary>
+	public TimeSpan Elapsed => _stopwatch.Elapsed;
+
+	/// <summary>
+	/// Gets the total elapsed time measured by the current chronograph instance's stopwatch, in milliseconds.
+	/// </summary>
+	public long ElapsedMilliseconds => _stopwatch.ElapsedMilliseconds;
+
+	/// <summary>
+	/// Gets the total elapsed time measured by the current chronograph instance's stopwatch, in timer ticks.
+	/// </summary>
+	public long ElapsedTicks => _stopwatch.ElapsedTicks;
+
+	/// <summary>
+	/// Gets a value indicating whether the current chronograph instance's stopwatch timer is running.
+	/// </summary>
+	public bool IsRunning => _stopwatch.IsRunning;
+
 	#endregion
 
 	#region Ctor
@@ -223,6 +243,17 @@ public class Chronograph : IDisposable
 
 		return this;
 	}
+
+	#endregion
+
+	#region Stopwatch control methods
+
+	/// <summary>
+	/// Stops the current chronograph instance's stopwatch.
+	/// </summary>
+	public void Stop() 
+		=>
+			_stopwatch.Stop();
 
 	#endregion
 
