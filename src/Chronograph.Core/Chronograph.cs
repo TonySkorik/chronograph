@@ -273,7 +273,7 @@ public class Chronograph : IDisposable
 	/// </summary>
 	protected virtual void Dispose(bool disposing)
 	{
-		if (!_stopwatch.IsRunning)
+		if (_stopwatch.ElapsedMilliseconds == 0)
 		{
 			_logger.Write(
 				ChronographLoggerEventLevel.Warning,
