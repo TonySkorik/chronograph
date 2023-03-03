@@ -24,6 +24,8 @@ public class Chronograph : IDisposable
 	private string _endActionMessageTemplate;
 	private Func<object>[] _countProviders;
 
+	private bool _wasEverStarted = false;
+
 	/// <summary>
 	/// Gets the total elapsed time measured by the current chronograph instance's stopwatch.
 	/// </summary>
@@ -196,6 +198,7 @@ public class Chronograph : IDisposable
 	public Chronograph For(string actionDescriptionTemplate, params object[] parameters)
 	{
 		_actionDescription = PrepareActionDescription(actionDescriptionTemplate);
+
 		if (parameters != null)
 		{
 			_actionDescriptionParameters.AddRange(parameters);
@@ -223,16 +226,22 @@ public class Chronograph : IDisposable
 	/// <param name="actionDescriptionTemplate">The action description message template.</param>
 	/// <param name="parameters">The action description message template serilog parameters.</param>
 	public Chronograph Start(string actionDescriptionTemplate, params object[] parameters)
-		=> For(actionDescriptionTemplate, parameters).Start();
+		=> 
+			For(actionDescriptionTemplate, parameters).Start();
 
 	/// <summary>
 	/// Starts the chronograph.
 	/// </summary>
 	public Chronograph Start()
 	{
+		_wasEverStarted = true;
+
 		if (_actionDescriptionParameters != null && _actionDescriptionParameters.Any())
 		{
-			_logger.Write(_eventLevel, $"Started {_actionDescription}.", _actionDescriptionParameters.ToArray());
+			_logger.Write(
+				_eventLevel,
+				$"Started {_actionDescription}.",
+				_actionDescriptionParameters.ToArray());
 		}
 		else
 		{
@@ -251,9 +260,7 @@ public class Chronograph : IDisposable
 	/// <summary>
 	/// Stops the current chronograph instance's stopwatch.
 	/// </summary>
-	public void Stop() 
-		=>
-			_stopwatch.Stop();
+	public void Stop() => _stopwatch.Stop();
 
 	#endregion
 
@@ -273,7 +280,7 @@ public class Chronograph : IDisposable
 	/// </summary>
 	protected virtual void Dispose(bool disposing)
 	{
-		if (_stopwatch.ElapsedMilliseconds == 0)
+		if (!_wasEverStarted)
 		{
 			_logger.Write(
 				ChronographLoggerEventLevel.Warning,
@@ -319,8 +326,12 @@ public class Chronograph : IDisposable
 		{
 			return provider?.Invoke();
 		}
-		catch
+		catch(Exception ex)
 		{
+			_logger.Write(
+				ChronographLoggerEventLevel.Error,
+				$"Error happened during the {_actionDescription} count provider invocation.\nException: {ex}");
+
 			return int.MinValue; // means invoking count provider threw an exception
 		}
 	}
@@ -328,6 +339,7 @@ public class Chronograph : IDisposable
 	private List<IDisposable> PushParameters()
 	{
 		var ret = new List<IDisposable>();
+
 		if (_parameters.Count != 0)
 		{
 			foreach (var paramKv in _parameters)
