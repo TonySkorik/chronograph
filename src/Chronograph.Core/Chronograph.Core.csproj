@@ -6,7 +6,9 @@
 		<RootNamespace>Chronograph.Core</RootNamespace>
 		<Authors>Tony Skorik</Authors>
 		<PackageProjectUrl>https://github.com/TonySkorik/chronograph</PackageProjectUrl>
-		<PackageTags>timing diagnostics stopwatch</PackageTags>
+		<RepositoryUrl>https://github.com/TonySkorik/chronograph</RepositoryUrl>
+		<PackageIcon>chronograph.png</PackageIcon>
+		<PackageTags>timing;diagnostics;stopwatch</PackageTags>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Description>This library provides Chronograph class core functionality. Chronograph is a library for convenient opertaions timing via `using` constructs and fluent syntax.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -15,8 +17,15 @@
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<Version>1.0.6</Version>
+		<Version>1.0.7</Version>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\chronograph.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
 	<ItemGroup>
 	  <Folder Include="Infrastructure\" />

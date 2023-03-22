@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
@@ -6,7 +6,9 @@
 		<RootNamespace>Chronograph.Microsoft.Extensions.Logging</RootNamespace>
 		<Authors>Tony Skorik</Authors>
 		<PackageProjectUrl>https://github.com/TonySkorik/chronograph</PackageProjectUrl>
-		<PackageTags>timing diagnostics stopwatch</PackageTags>
+		<RepositoryUrl>https://github.com/TonySkorik/chronograph</RepositoryUrl>
+		<PackageIcon>chronograph.png</PackageIcon>
+		<PackageTags>timing;diagnostics;stopwatch</PackageTags>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Description>This library provides Microsoft.Extensions.Logging logger integration logic for Chronograph.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -15,8 +17,15 @@
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<Version>1.0.6</Version>
+		<Version>1.0.7</Version>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\chronograph.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
