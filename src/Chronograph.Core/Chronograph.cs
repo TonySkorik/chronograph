@@ -12,364 +12,396 @@ namespace Chronograph.Core;
 /// <remarks>Uses <c>using()</c> scope Dispose pattern. Uses scope-modified closures to get timed operation results. May require some ReSharper "Access to modified closure" messages suppression attributes or comments.</remarks>
 public class Chronograph : IDisposable
 {
-	#region Private
+    #region Private
 
-	private readonly Stopwatch _stopwatch;
-	private readonly IChronographLogger _logger;
-	private readonly Dictionary<string, object> _parameters = new();
-	private readonly List<object> _actionDescriptionParameters = new();
+    private readonly Stopwatch _stopwatch;
+    private readonly IChronographLogger _logger;
+    private readonly Dictionary<string, object> _parameters = new();
+    private readonly List<object> _actionDescriptionParameters = new();
 
-	private ChronographLoggerEventLevel _eventLevel;
-	private string _actionDescription;
-	private string _endActionMessageTemplate;
-	private Func<object>[] _countProviders;
+    private ChronographLoggerEventLevel _eventLevel;
+    private string _actionDescription;
+    private string _endActionMessageTemplate;
+    private Func<object>[] _countProviders;
 
-	private bool _wasEverStarted = false;
+    private bool _wasEverStarted = false;
 
-	/// <summary>
-	/// Gets the total elapsed time measured by the current chronograph instance's stopwatch.
-	/// </summary>
-	public TimeSpan Elapsed => _stopwatch.Elapsed;
+    /// <summary>
+    /// Gets the total elapsed time measured by the current chronograph instance's stopwatch.
+    /// </summary>
+    public TimeSpan Elapsed => _stopwatch.Elapsed;
 
-	/// <summary>
-	/// Gets the total elapsed time measured by the current chronograph instance's stopwatch, in milliseconds.
-	/// </summary>
-	public long ElapsedMilliseconds => _stopwatch.ElapsedMilliseconds;
+    /// <summary>
+    /// Gets the total elapsed time measured by the current chronograph instance's stopwatch, in milliseconds.
+    /// </summary>
+    public long ElapsedMilliseconds => _stopwatch.ElapsedMilliseconds;
 
-	/// <summary>
-	/// Gets the total elapsed time measured by the current chronograph instance's stopwatch, in timer ticks.
-	/// </summary>
-	public long ElapsedTicks => _stopwatch.ElapsedTicks;
+    /// <summary>
+    /// Gets the total elapsed time measured by the current chronograph instance's stopwatch, in timer ticks.
+    /// </summary>
+    public long ElapsedTicks => _stopwatch.ElapsedTicks;
 
-	/// <summary>
-	/// Gets a value indicating whether the current chronograph instance's stopwatch timer is running.
-	/// </summary>
-	public bool IsRunning => _stopwatch.IsRunning;
+    /// <summary>
+    /// Gets a value indicating whether the current chronograph instance's stopwatch timer is running.
+    /// </summary>
+    public bool IsRunning => _stopwatch.IsRunning;
 
-	#endregion
+    #endregion
 
-	#region Ctor
+    #region Ctor
 
-	/// <summary>
-	/// Initializes a new instance of the <see cref="Chronograph"/> class.
-	/// </summary>
-	/// <param name="logger">The logger.</param>
-	/// <param name="eventLevel">The event level.</param>
-	protected internal Chronograph(IChronographLogger logger, ChronographLoggerEventLevel eventLevel)
-	{
-		_stopwatch = Stopwatch.StartNew();
-		_logger = logger;
-		_eventLevel = eventLevel;
-	}
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Chronograph"/> class.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="eventLevel">The event level.</param>
+    protected internal Chronograph(IChronographLogger logger, ChronographLoggerEventLevel eventLevel)
+    {
+        _stopwatch = Stopwatch.StartNew();
+        _logger = logger;
+        _eventLevel = eventLevel;
+    }
 
-	/// <summary>
-	/// Creates empty and not started chronograph. Used for Chronograph fluent builder methods.
-	/// </summary>
-	/// <param name="logger">The target logger chronograph will log to.</param>
-	protected internal Chronograph(IChronographLogger logger)
-	{
-		_logger = logger;
-		_stopwatch = new Stopwatch();
-		_eventLevel = ChronographLoggerEventLevel.Information;
-		_actionDescription = string.Empty;
-	}
+    /// <summary>
+    /// Creates empty and not started chronograph. Used for Chronograph fluent builder methods.
+    /// </summary>
+    /// <param name="logger">The target logger chronograph will log to.</param>
+    protected internal Chronograph(IChronographLogger logger)
+    {
+        _logger = logger;
+        _stopwatch = new Stopwatch();
+        _eventLevel = ChronographLoggerEventLevel.Information;
+        _actionDescription = string.Empty;
+    }
 
-	/// <summary>
-	/// Initializes a new instance of the <see cref="Chronograph"/> class.
-	/// </summary>
-	/// <param name="logger">The logger.</param>
-	/// <param name="actionDescription">The action description.</param>
-	/// <param name="eventLevel">The event level.</param>
-	/// <param name="actionDescriptionParameters">The action description parameters.</param>
-	/// <remarks>Use this to log information about operation duration with parameters that you want to be extracted by serilog.</remarks>
-	/// <example>
-	/// <c>
-	/// using(Log.CreateChronograph("operation description {withParameter}", operationDescriptionParameter)){
-	///		OpertaionToTime();
-	/// }
-	/// </c>
-	/// </example>
-	protected internal Chronograph(
-		IChronographLogger logger,
-		string actionDescription,
-		ChronographLoggerEventLevel eventLevel,
-		params object[] actionDescriptionParameters) : this(logger, eventLevel)
-	{
-		if (actionDescriptionParameters != null)
-		{
-			_actionDescriptionParameters.AddRange(actionDescriptionParameters);
-		}
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Chronograph"/> class.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="actionDescription">The action description.</param>
+    /// <param name="eventLevel">The event level.</param>
+    /// <param name="actionDescriptionParameters">The action description parameters.</param>
+    /// <remarks>Use this to log information about operation duration with parameters that you want to be extracted by serilog.</remarks>
+    /// <example>
+    /// <c>
+    /// using(Log.CreateChronograph("operation description {withParameter}", operationDescriptionParameter)){
+    ///		OpertaionToTime();
+    /// }
+    /// </c>
+    /// </example>
+    protected internal Chronograph(
+        IChronographLogger logger,
+        string actionDescription,
+        ChronographLoggerEventLevel eventLevel,
+        params object[] actionDescriptionParameters) : this(logger, eventLevel)
+    {
+        if (actionDescriptionParameters != null)
+        {
+            _actionDescriptionParameters.AddRange(actionDescriptionParameters);
+        }
 
-		_actionDescription = PrepareActionDescription(actionDescription);
+        _actionDescription = PrepareActionDescription(actionDescription);
 
-		if (actionDescriptionParameters != null)
-		{
-			_logger.Write(_eventLevel, $"Started {_actionDescription}", _actionDescriptionParameters);
-		}
-		else
-		{
-			_logger.Write(_eventLevel, $"Started {_actionDescription}");
-		}
-	}
+        if (actionDescriptionParameters != null)
+        {
+            _logger.Write(_eventLevel, $"Started {_actionDescription}", _actionDescriptionParameters);
+        }
+        else
+        {
+            _logger.Write(_eventLevel, $"Started {_actionDescription}");
+        }
+    }
 
-	/// <summary>
-	/// Initializes a new instance of the <see cref="Chronograph"/> class.
-	/// </summary>
-	/// <param name="logger">The logger.</param>
-	/// <param name="actionDescription">The action description.</param>
-	/// <param name="eventLevel">The logger event level.</param>
-	/// <param name="endActionMessageTemplate">The end action message template.</param>
-	/// <param name="countProviders">The count provider closures. Invoked upon operation completion.</param>
-	/// <example>
-	/// <c>
-	/// var targetDictionary = new Dictionary&lt;int,int&gt;();
-	/// using(Log.CreateChronograph("operation description", "got dictionary entries from server {countParamter}", ()=>targetDictionary.Count)){
-	///		targetDictionary = GetDicitonaryEntries();
-	/// }
-	/// </c>
-	/// </example>
-	protected internal Chronograph(
-		IChronographLogger logger,
-		string actionDescription,
-		ChronographLoggerEventLevel eventLevel,
-		string endActionMessageTemplate = null,
-		params Func<object>[] countProviders) : this(logger, actionDescription, eventLevel)
-	{
-		_endActionMessageTemplate = endActionMessageTemplate;
-		_countProviders = countProviders; // closures for getting objects count from within the chronograph scope
-	}
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Chronograph"/> class.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="actionDescription">The action description.</param>
+    /// <param name="eventLevel">The logger event level.</param>
+    /// <param name="endActionMessageTemplate">The end action message template.</param>
+    /// <param name="countProviders">The count provider closures. Invoked upon operation completion.</param>
+    /// <example>
+    /// <c>
+    /// var targetDictionary = new Dictionary&lt;int,int&gt;();
+    /// using(Log.CreateChronograph("operation description", "got dictionary entries from server {countParamter}", ()=>targetDictionary.Count)){
+    ///		targetDictionary = GetDicitonaryEntries();
+    /// }
+    /// </c>
+    /// </example>
+    protected internal Chronograph(
+        IChronographLogger logger,
+        string actionDescription,
+        ChronographLoggerEventLevel eventLevel,
+        string endActionMessageTemplate = null,
+        params Func<object>[] countProviders) : this(logger, actionDescription, eventLevel)
+    {
+        _endActionMessageTemplate = endActionMessageTemplate;
+        _countProviders = countProviders; // closures for getting objects count from within the chronograph scope
+    }
 
-	#endregion
+    #endregion
 
-	#region Factory methods
+    #region Factory methods
 
-	/// <summary>
-	/// Creates empty and not started chronograph. Used for Chronograph fluent builder methods.
-	/// </summary>
-	/// <param name="logger">The logger associated with this chronograph instance.</param>
-	public static Chronograph Create(IChronographLogger logger) => new(logger);
+    /// <summary>
+    /// Creates empty and not started chronograph. Used for Chronograph fluent builder methods.
+    /// </summary>
+    /// <param name="logger">The logger associated with this chronograph instance.</param>
+    public static Chronograph Create(IChronographLogger logger) => new(logger);
 
-	#endregion
+    #endregion
 
-	#region Methods for setting up chronograph instance
+    #region Methods for setting up chronograph instance
 
-	/// <summary>
-	/// Setts the <see cref="ChronographLoggerEventLevel"/> of the logger to the specified value.
-	/// </summary>
-	/// <param name="logEventLevel">The level to set.</param>
-	public Chronograph WithEventLevel(ChronographLoggerEventLevel logEventLevel)
-	{
-		_eventLevel = logEventLevel;
+    /// <summary>
+    /// Setts the <see cref="ChronographLoggerEventLevel"/> of the logger to the specified value.
+    /// </summary>
+    /// <param name="logEventLevel">The level to set.</param>
+    public Chronograph WithEventLevel(ChronographLoggerEventLevel logEventLevel)
+    {
+        _eventLevel = logEventLevel;
 
-		return this;
-	}
+        return this;
+    }
 
-	/// <summary>
-	/// Adds parameter to a logging context. Parameters will be used to enrich context when chronograph writes action completion messages.
-	/// </summary>
-	/// <param name="name">The parameter name.</param>
-	/// <param name="value">The parameter value.</param>
-	public Chronograph WithParameter(string name, object value)
-	{
-		_parameters[name] = value;
+    /// <summary>
+    /// Adds parameter to a logging context. Parameters will be used to enrich context when chronograph writes action completion messages.
+    /// </summary>
+    /// <param name="name">The parameter name.</param>
+    /// <param name="value">The parameter value.</param>
+    public Chronograph WithParameter(string name, object value)
+    {
+        _parameters[name] = value;
 
-		return this;
-	}
+        return this;
+    }
 
-	/// <summary>
-	/// Adds parameters to a logging context. Parameters will be used to enrich context when chronograph writes action completion messages.
-	/// </summary>
-	/// <param name="parameters">The parameters dictionary.</param>
-	public Chronograph WithParameters(IEnumerable<KeyValuePair<string, object>> parameters)
-	{
-		foreach (var parameterKv in parameters)
-		{
-			_parameters[parameterKv.Key] = parameterKv.Value;
-		}
+    /// <summary>
+    /// Adds parameters to a logging context. Parameters will be used to enrich context when chronograph writes action completion messages.
+    /// </summary>
+    /// <param name="parameters">The parameters dictionary.</param>
+    public Chronograph WithParameters(IEnumerable<KeyValuePair<string, object>> parameters)
+    {
+        foreach (var parameterKv in parameters)
+        {
+            _parameters[parameterKv.Key] = parameterKv.Value;
+        }
 
-		return this;
-	}
+        return this;
+    }
 
-	/// <summary>
-	/// Adds action description which will be used to report start and an end. Optionally specifies action description serilog template parameters.
-	/// </summary>
-	/// <param name="actionDescriptionTemplate">The action description message template.</param>
-	/// <param name="parameters">The action description message template serilog parameters.</param>
-	public Chronograph For(string actionDescriptionTemplate, params object[] parameters)
-	{
-		_actionDescription = PrepareActionDescription(actionDescriptionTemplate);
+    /// <summary>
+    /// Adds action description which will be used to report start and an end. Optionally specifies action description serilog template parameters.
+    /// </summary>
+    /// <param name="actionDescriptionTemplate">The action description message template.</param>
+    /// <param name="parameters">The action description message template serilog parameters.</param>
+    public Chronograph For(string actionDescriptionTemplate, params object[] parameters)
+    {
+        _actionDescription = PrepareActionDescription(actionDescriptionTemplate);
 
-		if (parameters != null)
-		{
-			_actionDescriptionParameters.AddRange(parameters);
-		}
+        if (parameters != null)
+        {
+            _actionDescriptionParameters.AddRange(parameters);
+        }
 
-		return this;
-	}
+        return this;
+    }
 
-	/// <summary>
-	/// Adds end action report message that will be logged when action completes. Optionally specifies message template serilog parameters.
-	/// </summary>
-	/// <param name="endMessageTemplate">The end action message template.</param>
-	/// <param name="countProviders">The end action message template serilog parameters.</param>
-	public Chronograph Report(string endMessageTemplate, params Func<object>[] countProviders)
-	{
-		_endActionMessageTemplate = endMessageTemplate;
-		_countProviders = countProviders;
+    /// <summary>
+    /// Adds end action report message that will be logged when action completes. Optionally specifies message template serilog parameters.
+    /// </summary>
+    /// <param name="endMessageTemplate">The end action message template.</param>
+    /// <param name="countProviders">The end action message template serilog parameters.</param>
+    public Chronograph Report(string endMessageTemplate, params Func<object>[] countProviders)
+    {
+        _endActionMessageTemplate = endMessageTemplate;
+        _countProviders = countProviders;
 
-		return this;
-	}
+        return this;
+    }
 
-	/// <summary>
-	/// Starts the chronograph with specified action description template and optional serilog parameters.
-	/// </summary>
-	/// <param name="actionDescriptionTemplate">The action description message template.</param>
-	/// <param name="parameters">The action description message template serilog parameters.</param>
-	public Chronograph Start(string actionDescriptionTemplate, params object[] parameters)
-		=> 
-			For(actionDescriptionTemplate, parameters).Start();
+    /// <summary>
+    /// Starts the chronograph with specified action description template and optional serilog parameters.
+    /// </summary>
+    /// <param name="actionDescriptionTemplate">The action description message template.</param>
+    /// <param name="parameters">The action description message template serilog parameters.</param>
+    public Chronograph Start(string actionDescriptionTemplate, params object[] parameters)
+        =>
+            For(actionDescriptionTemplate, parameters).Start();
 
-	/// <summary>
-	/// Starts the chronograph.
-	/// </summary>
-	public Chronograph Start()
-	{
-		_wasEverStarted = true;
+    /// <summary>
+    /// Starts the chronograph.
+    /// </summary>
+    public Chronograph Start()
+    {
+        _wasEverStarted = true;
 
-		if (_actionDescriptionParameters != null && _actionDescriptionParameters.Any())
-		{
-			_logger.Write(
-				_eventLevel,
-				$"Started {_actionDescription}.",
-				_actionDescriptionParameters.ToArray());
-		}
-		else
-		{
-			_logger.Write(_eventLevel, $"Started {_actionDescription}.");
-		}
+        if (_actionDescriptionParameters != null && _actionDescriptionParameters.Any())
+        {
+            _logger.Write(
+                _eventLevel,
+                $"Started {_actionDescription}.",
+                _actionDescriptionParameters.ToArray());
+        }
+        else
+        {
+            _logger.Write(_eventLevel, $"Started {_actionDescription}.");
+        }
 
-		_stopwatch.Start();
+        _stopwatch.Start();
 
-		return this;
-	}
+        return this;
+    }
 
-	#endregion
+    #endregion
 
-	#region Stopwatch control methods
+    #region Stopwatch control methods
 
-	/// <summary>
-	/// Stops the current chronograph instance's stopwatch.
-	/// </summary>
-	public void Stop() => _stopwatch.Stop();
+    /// <summary>
+    /// Stops the current chronograph instance's stopwatch.
+    /// </summary>
+    public void Stop() => _stopwatch.Stop();
 
-	#endregion
+    #endregion
 
-	#region Dispose pattern logic
+    #region Dispose pattern logic
 
-	/// <summary>
-	/// Disposes this chronograph instance, stopping the underlying Stopwatch and reporting action duration and optionally writing down end action message.
-	/// </summary>
-	public void Dispose()
-	{
-		Dispose(true);
-		GC.SuppressFinalize(this);
-	}
+    /// <summary>
+    /// Disposes this chronograph instance, stopping the underlying Stopwatch and reporting action duration and writing down the specified end action message.
+    /// </summary>
+    /// <remarks>
+    /// If the end action mesage was configured by <see cref="Report(string, Func{object}[])"/> method 
+    /// or via corresponding ctor, it will be overridden.
+    /// If the count providers array was configured by <see cref="Report(string, Func{object}[])"/> method 
+    /// or via corresponding ctor, and <paramref name="countProviders"/> parameter cpecified, it will override previously configured count providers.    
+    /// </remarks>
+    public void Dispose(string endMessageTemplate, params Func<object>[] countProviders)
+    {
 
-	/// <summary>
-	/// Disposes this chronograph instance, stopping the underlying Stopwatch and reporting action duration and optionally writing down end action message.
-	/// </summary>
-	protected virtual void Dispose(bool disposing)
-	{
-		if (!_wasEverStarted)
-		{
-			_logger.Write(
-				ChronographLoggerEventLevel.Warning,
-				$"Looks like chronograph for operation {_actionDescription} was not properly initialized or already disposed or stopped. Reported results may be incorrect.");
-		}
+        if (_endActionMessageTemplate is not null)
+        {
+            _logger.Write(
+                ChronographLoggerEventLevel.Warning,
+                $"Looks like the end message template for operation '{_actionDescription}' was previously configured to '{_endActionMessageTemplate}', it will be overridden by specified '{endMessageTemplate}' message");
+        }
 
-		_stopwatch.Stop();
+        if (_countProviders is { Length: > 0 })
+        {
+            _logger.Write(
+                ChronographLoggerEventLevel.Warning,
+                $"Looks like the {_countProviders.Length} parameter provider functions for end message template were previously configured, they will be overridden by specified {countProviders.Length} functions");
+        }
 
-		WithParameter("OperationDurationMilliseceonds", _stopwatch.Elapsed.TotalMilliseconds);
+        _countProviders = countProviders;
+        _endActionMessageTemplate = endMessageTemplate;
 
-		using (new DisposablesWrapper(PushParameters()))
-		{
-			var elapsedString = _stopwatch.Elapsed.ToString("g");
-			var actionDescriptionParameters = _actionDescriptionParameters.ToList(); // defensive copy
+        Dispose();
+    }
 
-			if (_countProviders != null
-				&& _countProviders.Length > 0)
-			{
-				var counts = _countProviders.Select(TryInvokeCountProvider).Where(c => c != null);
-				actionDescriptionParameters.AddRange(counts);
-			}
+    /// <summary>
+    /// Disposes this chronograph instance, stopping the underlying Stopwatch and reporting action duration and optionally writing down end action message.
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
-			actionDescriptionParameters.Add(elapsedString);
+    /// <summary>
+    /// Disposes this chronograph instance, stopping the underlying Stopwatch and reporting action duration and optionally writing down end action message.
+    /// </summary>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_wasEverStarted)
+        {
+            _logger.Write(
+                ChronographLoggerEventLevel.Warning,
+                $"Looks like chronograph for operation '{_actionDescription}' was not properly initialized or already disposed or stopped. Reported results may be incorrect");
+        }
 
-			string finalTemplate = string.IsNullOrWhiteSpace(_endActionMessageTemplate)
-				? $"Finished {_actionDescription}. [{{operationDuration}}]"
-				: $"Finished {_actionDescription}. {_endActionMessageTemplate}. [{{operationDuration}}]";
+        _stopwatch.Stop();
 
-			_logger.Write(
-				_eventLevel,
-				finalTemplate,
-				actionDescriptionParameters.ToArray());
-		}
-	}
+        WithParameter("OperationDurationMilliseceonds", _stopwatch.Elapsed.TotalMilliseconds);
 
-	#endregion
+        using (new DisposablesWrapper(PushParameters()))
+        {
+            var elapsedString = _stopwatch.Elapsed.ToString("g");
+            var actionDescriptionParameters = _actionDescriptionParameters.ToList(); // defensive copy
 
-	#region Service methods
+            if (_countProviders != null
+                && _countProviders.Length > 0)
+            {
+                var counts = _countProviders.Select(TryInvokeCountProvider).Where(c => c != null);
+                actionDescriptionParameters.AddRange(counts);
+            }
 
-	private object TryInvokeCountProvider(Func<object> provider)
-	{
-		try
-		{
-			return provider?.Invoke();
-		}
-		catch(Exception ex)
-		{
-			_logger.Write(
-				ChronographLoggerEventLevel.Error,
-				$"Error happened during the {_actionDescription} count provider invocation.\nException: {ex}");
+            actionDescriptionParameters.Add(elapsedString);
 
-			return int.MinValue; // means invoking count provider threw an exception
-		}
-	}
+            string finalTemplate = string.IsNullOrWhiteSpace(_endActionMessageTemplate)
+                ? $"Finished {_actionDescription}. [{{operationDuration}}]"
+                : $"Finished {_actionDescription}. {_endActionMessageTemplate}. [{{operationDuration}}]";
 
-	private List<IDisposable> PushParameters()
-	{
-		var ret = new List<IDisposable>();
+            _logger.Write(
+                _eventLevel,
+                finalTemplate,
+                actionDescriptionParameters.ToArray());
+        }
+    }
 
-		if (_parameters.Count != 0)
-		{
-			foreach (var paramKv in _parameters)
-			{
-				ret.Add(_logger.PushProperty(paramKv.Key, paramKv.Value));
-			}
-		}
+    #endregion
 
-		return ret;
-	}
+    #region Service methods
 
-	private string PrepareActionDescription(string actionDescription)
-	{
-		if (string.IsNullOrEmpty(actionDescription))
-		{
-			return string.Empty;
-		}
+    private object TryInvokeCountProvider(Func<object> provider)
+    {
+        try
+        {
+            return provider?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            _logger.Write(
+                ChronographLoggerEventLevel.Error,
+                $"Error happened during the '{_actionDescription}' count provider invocation.\nException: {ex}");
 
-		if (!char.IsUpper(actionDescription[0]))
-		{
-			return actionDescription;
-		}
+            return int.MinValue; // means invoking count provider threw an exception
+        }
+    }
 
-		StringBuilder prepared = new(actionDescription)
-		{
-			[0] = char.ToUpper(actionDescription[0])
-		};
+    private List<IDisposable> PushParameters()
+    {
+        var ret = new List<IDisposable>();
 
-		return prepared.ToString();
-	}
+        if (_parameters.Count != 0)
+        {
+            foreach (var paramKv in _parameters)
+            {
+                ret.Add(_logger.PushProperty(paramKv.Key, paramKv.Value));
+            }
+        }
 
-	#endregion
+        return ret;
+    }
+
+    private string PrepareActionDescription(string actionDescription)
+    {
+        if (string.IsNullOrEmpty(actionDescription))
+        {
+            return string.Empty;
+        }
+
+        if (!char.IsUpper(actionDescription[0]))
+        {
+            return actionDescription;
+        }
+
+        StringBuilder prepared = new(actionDescription)
+        {
+            [0] = char.ToUpper(actionDescription[0])
+        };
+
+        return prepared.ToString();
+    }
+
+    #endregion
 }
