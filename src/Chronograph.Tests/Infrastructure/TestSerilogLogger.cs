@@ -1,9 +1,8 @@
 ﻿using System.Text;
-
 using Serilog;
 using Serilog.Events;
 
-namespace Chronograph.Tests.TestLoggers;
+namespace Chronograph.Tests.Infrastructure;
 
 internal class TestSerilogLogger : ILogger
 {

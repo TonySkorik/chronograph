@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Chronograph.Tests.TestLoggers;
+namespace Chronograph.Tests.Infrastructure;
 
 internal class TestMicrosoftLogger : ILogger
 {

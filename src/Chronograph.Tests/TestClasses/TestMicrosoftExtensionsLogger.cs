@@ -1,13 +1,11 @@
 ﻿using Chronograph.Core.Logging;
 using Chronograph.Microsoft.Extensions.Logging.Helpers;
-using Chronograph.Tests.TestLoggers;
-
+using Chronograph.Tests.Infrastructure;
 using FluentAssertions;
-
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Chronograph.Tests;
+namespace Chronograph.Tests.TestClasses;
 
 [TestClass]
 public class TestMicrosoftExtensionsLogger
@@ -68,6 +66,23 @@ public class TestMicrosoftExtensionsLogger
             m => m.message.Contains("testCount=42")
                 && m.message.Contains("testString=test string value")
                 && m.message.Contains("testDoubleValue=0.5"));
+    }
+
+    [TestMethod]
+    public void TestOperationDescriptionWithCurlyBraces()
+    {
+        var logger = GetLogger();
+        var chrono = logger.Chrono()
+            .For(
+                $"test operation description with number {1567 + DateTime.Now.Hour} "
+                + $"and record {new TestRecord(42, "test", DateTime.Now)}")
+            .Start();
+
+        chrono.Dispose();
+
+        logger.WrittenEvents.Should().HaveCount(2);
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started test operation"));
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished test operation"));
     }
 
     [TestMethod]

@@ -277,7 +277,6 @@ public class Chronograph : IDisposable
     /// </remarks>
     public void Dispose(string endMessageTemplate, params Func<object>[] countProviders)
     {
-
         if (_endActionMessageTemplate is not null)
         {
             _logger.Write(
@@ -312,39 +311,60 @@ public class Chronograph : IDisposable
     /// </summary>
     protected virtual void Dispose(bool disposing)
     {
-        if (!_wasEverStarted)
+        try
         {
-            _logger.Write(
-                ChronographLoggerEventLevel.Warning,
-                $"Looks like chronograph for operation '{_actionDescription}' was not properly initialized or already disposed or stopped. Reported results may be incorrect");
-        }
-
-        _stopwatch.Stop();
-
-        WithParameter("OperationDurationMilliseceonds", _stopwatch.Elapsed.TotalMilliseconds);
-
-        using (new DisposablesWrapper(PushParameters()))
-        {
-            var elapsedString = _stopwatch.Elapsed.ToString("g");
-            var actionDescriptionParameters = _actionDescriptionParameters.ToList(); // defensive copy
-
-            if (_countProviders != null
-                && _countProviders.Length > 0)
+            if (!_wasEverStarted)
             {
-                var counts = _countProviders.Select(TryInvokeCountProvider).Where(c => c != null);
-                actionDescriptionParameters.AddRange(counts);
+                _logger.Write(
+                    ChronographLoggerEventLevel.Warning,
+                    $"Looks like chronograph for operation '{_actionDescription}' was not properly initialized or already disposed or stopped. Reported results may be incorrect");
             }
 
-            actionDescriptionParameters.Add(elapsedString);
+            if (_actionDescription.Contains("{")
+                || _actionDescription.Contains("}"))
+            {
+                // escape curly braces in action description to it from being interpreted as a format string
+                // curly braces may appear in action description for example from records being present in string interpolation
+                
+                _actionDescription = _actionDescription
+                    .Replace("{", "{{")
+                    .Replace("}", "}}");
+            }
 
-            string finalTemplate = string.IsNullOrWhiteSpace(_endActionMessageTemplate)
-                ? $"Finished {_actionDescription}. [{{operationDuration}}]"
-                : $"Finished {_actionDescription}. {_endActionMessageTemplate}. [{{operationDuration}}]";
+            _stopwatch.Stop();
 
+            WithParameter("OperationDurationMilliseceonds", _stopwatch.Elapsed.TotalMilliseconds);
+
+            using (new DisposablesWrapper(PushParameters()))
+            {
+                var elapsedString = _stopwatch.Elapsed.ToString("g");
+                var actionDescriptionParameters = _actionDescriptionParameters.ToList(); // defensive copy
+
+                if (_countProviders != null
+                    && _countProviders.Length > 0)
+                {
+                    var counts = _countProviders.Select(TryInvokeCountProvider).Where(c => c != null);
+                    actionDescriptionParameters.AddRange(counts);
+                }
+
+                actionDescriptionParameters.Add(elapsedString);
+
+                string finalTemplate = string.IsNullOrWhiteSpace(_endActionMessageTemplate)
+                    ? $"Finished {_actionDescription}. [{{operationDuration}}]"
+                    : $"Finished {_actionDescription}. {_endActionMessageTemplate}. [{{operationDuration}}]";
+
+                _logger.Write(
+                    _eventLevel,
+                    finalTemplate,
+                    actionDescriptionParameters.ToArray());
+            }
+        }
+        catch (Exception ex)
+        {
             _logger.Write(
-                _eventLevel,
-                finalTemplate,
-                actionDescriptionParameters.ToArray());
+                ChronographLoggerEventLevel.Error,
+                "An exception happened during chronograph disposal. Details: {Exception}",
+                ex);
         }
     }
 

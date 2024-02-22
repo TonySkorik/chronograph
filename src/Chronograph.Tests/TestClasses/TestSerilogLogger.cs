@@ -1,18 +1,16 @@
 using Chronograph.Core.Logging;
 using Chronograph.Serilog.Helpers;
-
+using Chronograph.Tests.Infrastructure;
 using FluentAssertions;
-
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Serilog.Events;
 
-namespace Chronograph.Tests;
+namespace Chronograph.Tests.TestClasses;
 
 [TestClass]
 public class TestSerilogLogger
 {
-    private TestLoggers.TestSerilogLogger GetLogger() => new();
+    private Infrastructure.TestSerilogLogger GetLogger() => new();
 
     [TestMethod]
     public void TestSimpleOperation()
@@ -59,6 +57,23 @@ public class TestSerilogLogger
             m => m.message.Contains("testCount=42")
                 && m.message.Contains("testString=\"test string value\"")
                 && m.message.Contains("testDoubleValue=0.5"));
+    }
+
+    [TestMethod]
+    public void TestOperationDescriptionWithCurlyBraces()
+    {
+        var logger = GetLogger();
+        var chrono = logger.Chrono()
+            .For(
+                $"test operation description with number {1567 + DateTime.Now.Hour} "
+                + $"and record {new TestRecord(42, "test", DateTime.Now)}")
+            .Start();
+
+        chrono.Dispose();
+
+        logger.WrittenEvents.Should().HaveCount(2);
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started test operation"));
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished test operation"));
     }
 
     [TestMethod]
