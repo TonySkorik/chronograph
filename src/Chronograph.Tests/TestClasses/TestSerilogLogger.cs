@@ -166,4 +166,71 @@ public class TestSerilogLogger
         logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished test operation"));
         logger.WrittenEvents.Should().Contain(m => m.message.Contains("testParameter=43"));
     }
+
+    [TestMethod]
+    public async Task TestLongRunningOperationWithoutParametersWithoutSpecificMessage()
+    {
+        var logger = GetLogger();
+        
+        var chrono = logger.Chrono().For("test operation")
+            .WithLongRunningOperationReport(TimeSpan.FromMilliseconds(1))
+            .Start();
+
+        await Task.Delay(TimeSpan.FromMilliseconds(2));
+        
+        chrono.Dispose();
+
+        logger.WrittenEvents.Should().HaveCount(3);
+        
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started test operation"));
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished test operation"));
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("took a long time to finish"));
+    }
+
+    [TestMethod]
+    public async Task TestLongRunningOperationWithParametersWithoutSpecificMessage()
+    {
+        var logger = GetLogger();
+
+        var chrono = logger.Chrono()
+            .For("test operation {IntParameter}", 42)
+            .WithLongRunningOperationReport(TimeSpan.FromMilliseconds(1))
+            .Start();
+
+        await Task.Delay(TimeSpan.FromMilliseconds(2));
+
+        chrono.Dispose();
+
+        logger.WrittenEvents.Should().HaveCount(3);
+
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started test operation"));
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished test operation"));
+        logger.WrittenEvents.Should().Contain(
+            m => m.message.Contains("test operation 42 took a long time to finish"));
+    }
+
+    [TestMethod]
+    public async Task TestLongRunningOperationWithParametersWithSpecificMessage()
+    {
+        var logger = GetLogger();
+
+        var chrono = logger.Chrono()
+            .For("test operation {IntParameter}", 42)
+            .WithLongRunningOperationReport(
+                TimeSpan.FromMilliseconds(1),
+                "Long runing operation {LongParameter} detected",
+                1567L)
+            .Start();
+
+        await Task.Delay(TimeSpan.FromMilliseconds(2));
+
+        chrono.Dispose();
+
+        logger.WrittenEvents.Should().HaveCount(3);
+
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started test operation"));
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished test operation"));
+        logger.WrittenEvents.Should().Contain(
+            m => m.message.Contains("Long runing operation 1567 detected"));
+    }
 }

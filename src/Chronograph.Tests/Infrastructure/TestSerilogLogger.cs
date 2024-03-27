@@ -6,7 +6,7 @@ namespace Chronograph.Tests.Infrastructure;
 
 internal class TestSerilogLogger : ILogger
 {
-    public List<(LogEvent logEvent, string message)> WrittenEvents { set; get; } = new();
+    public List<(LogEvent logEvent, string message)> WrittenEvents { set; get; } = [];
 
     public void Write(LogEvent logEvent)
     {

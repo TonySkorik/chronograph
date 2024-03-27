@@ -19,7 +19,7 @@ internal class TestMicrosoftLogger : ILogger
         { }
     }
 
-    public List<(LogLevel level, EventId eventId, Exception ex, string message)> WrittenEvents { set; get; } = new();
+    public List<(LogLevel level, EventId eventId, Exception ex, string message)> WrittenEvents { set; get; } = [];
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
     {

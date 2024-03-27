@@ -11,7 +11,7 @@ internal class DisposablesWrapper : IDisposable
 
 	public void Dispose()
 	{
-		if (_disposables == null || _disposables.Count == 0)
+		if (_disposables is not {Count: > 0})
 		{
 			return;
 		}

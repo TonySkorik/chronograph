@@ -4,6 +4,10 @@ using System.Text;
 using Chronograph.Core.Infrastructure;
 using Chronograph.Core.Logging;
 
+// ReSharper disable MemberCanBePrivate.Global | Justification - public API
+// ReSharper disable MemberCanBeInternal | Justification - public API
+// ReSharper disable UnusedMember.Global | Justification - public API
+
 namespace Chronograph.Core;
 
 /// <summary>
@@ -12,19 +16,31 @@ namespace Chronograph.Core;
 /// <remarks>Uses <c>using()</c> scope Dispose pattern. Uses scope-modified closures to get timed operation results. May require some ReSharper "Access to modified closure" messages suppression attributes or comments.</remarks>
 public class Chronograph : IDisposable
 {
-    #region Private
-
+    /// <summary>
+    /// The name of the structured logging parameter that contains timed operation run time in milliseconds. 
+    /// </summary>
+    public const string OperationDurationMilliseceondsLoggerParameterName = "OperationDurationMilliseceonds";
+    
+    /// <summary>
+    /// The name of the structured logging parameter that indicates that the timed operation is considered long-runing.
+    /// </summary>
+    public const string IsLongRunningOperationLoggerParameterName = "IsLongRunningOperation";
+    
     private readonly Stopwatch _stopwatch;
     private readonly IChronographLogger _logger;
     private readonly Dictionary<string, object> _parameters = new();
-    private readonly List<object> _actionDescriptionParameters = new();
+    private readonly List<object> _actionDescriptionParameters = [];
 
     private ChronographLoggerEventLevel _eventLevel;
     private string _actionDescription;
     private string _endActionMessageTemplate;
     private Func<object>[] _countProviders;
 
-    private bool _wasEverStarted = false;
+    private TimeSpan? _longRunningOperationThreshold;
+    private string _longRunningOperationReportMessage;
+    private object[] _longRunningOperationReportMessageParameters;
+
+    private bool _wasEverStarted;
 
     /// <summary>
     /// Gets the total elapsed time measured by the current chronograph instance's stopwatch.
@@ -46,7 +62,11 @@ public class Chronograph : IDisposable
     /// </summary>
     public bool IsRunning => _stopwatch.IsRunning;
 
-    #endregion
+    /// <summary>
+    /// Gets the exclusive threshold after which the timed operation considered long-running and reported upon chronograph instance disposal.
+    /// <c>null</c> value indicates that long-running operation reporting is not performed.
+    /// </summary>
+    public TimeSpan? LongRunningOperationThreshold => _longRunningOperationThreshold;
 
     #region Ctor
 
@@ -100,7 +120,7 @@ public class Chronograph : IDisposable
             _actionDescriptionParameters.AddRange(actionDescriptionParameters);
         }
 
-        _actionDescription = PrepareActionDescription(actionDescription);
+        _actionDescription = actionDescription.LowercaseFirstChar();
 
         if (actionDescriptionParameters != null)
         {
@@ -141,7 +161,7 @@ public class Chronograph : IDisposable
 
     #endregion
 
-    #region Factory methods
+    #region Methods for setting up chronograph instance
 
     /// <summary>
     /// Creates empty and not started chronograph. Used for Chronograph fluent builder methods.
@@ -149,12 +169,26 @@ public class Chronograph : IDisposable
     /// <param name="logger">The logger associated with this chronograph instance.</param>
     public static Chronograph Create(IChronographLogger logger) => new(logger);
 
-    #endregion
-
-    #region Methods for setting up chronograph instance
+    /// <summary>
+    /// Sets the chronograph <see cref="LongRunningOperationThreshold"/> to the specified value and enables long-running operation reporting.
+    /// </summary>
+    /// <param name="longRunningOperationThreshold">The exclusive threshold after which the opertaion is considered to be long-running.</param>
+    /// <param name="longRunningOperationReportMessage">The optional long running operation report message. If not provided, thedefault message will be used.</param>
+    /// <param name="longRunningOperationReportMessageParameters">The optional long running operation report message parameters.</param>
+    public Chronograph WithLongRunningOperationReport(
+        TimeSpan longRunningOperationThreshold, 
+        string longRunningOperationReportMessage = null,
+        params object[] longRunningOperationReportMessageParameters)
+    {
+        _longRunningOperationThreshold = longRunningOperationThreshold;
+        _longRunningOperationReportMessage = longRunningOperationReportMessage;
+        _longRunningOperationReportMessageParameters = longRunningOperationReportMessageParameters;
+        
+        return this;
+    }
 
     /// <summary>
-    /// Setts the <see cref="ChronographLoggerEventLevel"/> of the logger to the specified value.
+    /// Sets the <see cref="ChronographLoggerEventLevel"/> of the logger to the specified value.
     /// </summary>
     /// <param name="logEventLevel">The level to set.</param>
     public Chronograph WithEventLevel(ChronographLoggerEventLevel logEventLevel)
@@ -197,7 +231,7 @@ public class Chronograph : IDisposable
     /// <param name="parameters">The action description message template serilog parameters.</param>
     public Chronograph For(string actionDescriptionTemplate, params object[] parameters)
     {
-        _actionDescription = PrepareActionDescription(actionDescriptionTemplate);
+        _actionDescription = actionDescriptionTemplate.LowercaseFirstChar();
 
         if (parameters != null)
         {
@@ -219,7 +253,11 @@ public class Chronograph : IDisposable
 
         return this;
     }
+    
+    #endregion
 
+    #region Methods for controlling chronograph running state
+    
     /// <summary>
     /// Starts the chronograph with specified action description template and optional serilog parameters.
     /// </summary>
@@ -253,15 +291,16 @@ public class Chronograph : IDisposable
         return this;
     }
 
-    #endregion
-
-    #region Stopwatch control methods
-
     /// <summary>
     /// Stops the current chronograph instance's stopwatch.
     /// </summary>
-    public void Stop() => _stopwatch.Stop();
+    public void Pause() => _stopwatch.Stop();
 
+    /// <summary>
+    /// Resumes the current chronograph instance's stopwatch.
+    /// </summary>
+    public void Resume() => _stopwatch.Start();
+    
     #endregion
 
     #region Dispose pattern logic
@@ -313,6 +352,8 @@ public class Chronograph : IDisposable
     {
         try
         {
+            _stopwatch.Stop();
+            
             if (!_wasEverStarted)
             {
                 _logger.Write(
@@ -320,34 +361,36 @@ public class Chronograph : IDisposable
                     $"Looks like chronograph for operation '{_actionDescription}' was not properly initialized or already disposed or stopped. Reported results may be incorrect");
             }
 
-            if (_actionDescription.Contains("{")
-                || _actionDescription.Contains("}"))
+            _actionDescription = _actionDescription.EscapeCurlyBraces();
+
+            WithParameter(OperationDurationMilliseceondsLoggerParameterName, _stopwatch.Elapsed.TotalMilliseconds);
+
+            bool isLongRunningOperation = 
+                _longRunningOperationThreshold is { } longRunningOperationThreshold
+                && _stopwatch.Elapsed > longRunningOperationThreshold;
+
+            if (isLongRunningOperation)
             {
-                // escape curly braces in action description to it from being interpreted as a format string
-                // curly braces may appear in action description for example from records being present in string interpolation
-                
-                _actionDescription = _actionDescription
-                    .Replace("{", "{{")
-                    .Replace("}", "}}");
+                WithParameter(IsLongRunningOperationLoggerParameterName, true);
             }
-
-            _stopwatch.Stop();
-
-            WithParameter("OperationDurationMilliseceonds", _stopwatch.Elapsed.TotalMilliseconds);
 
             using (new DisposablesWrapper(PushParameters()))
             {
                 var elapsedString = _stopwatch.Elapsed.ToString("g");
                 var actionDescriptionParameters = _actionDescriptionParameters.ToList(); // defensive copy
 
-                if (_countProviders != null
-                    && _countProviders.Length > 0)
+                if (_countProviders is {Length: > 0})
                 {
-                    var counts = _countProviders.Select(TryInvokeCountProvider).Where(c => c != null);
+                    var counts = _countProviders
+                        .Select(TryInvokeCountProvider)
+                        .Where(c => c != null);
+                    
                     actionDescriptionParameters.AddRange(counts);
                 }
-
+                
                 actionDescriptionParameters.Add(elapsedString);
+
+                var actionDescriptionParameterArray = actionDescriptionParameters.ToArray();
 
                 string finalTemplate = string.IsNullOrWhiteSpace(_endActionMessageTemplate)
                     ? $"Finished {_actionDescription}. [{{operationDuration}}]"
@@ -356,7 +399,22 @@ public class Chronograph : IDisposable
                 _logger.Write(
                     _eventLevel,
                     finalTemplate,
-                    actionDescriptionParameters.ToArray());
+                    actionDescriptionParameterArray);
+
+                if (isLongRunningOperation)
+                {
+                    var longRunningOperationReportTemplate =
+                        string.IsNullOrEmpty(_longRunningOperationReportMessage)
+                            ? $"{_actionDescription} took a long time to finish >({_longRunningOperationThreshold.Value!})"
+                            : _longRunningOperationReportMessage;
+
+                    _logger.Write(
+                        _eventLevel,
+                        longRunningOperationReportTemplate,
+                        _longRunningOperationReportMessageParameters is {Length: > 0}
+                            ? _longRunningOperationReportMessageParameters
+                            : actionDescriptionParameterArray);
+                }
             }
         }
         catch (Exception ex)
@@ -367,6 +425,8 @@ public class Chronograph : IDisposable
                 ex);
         }
     }
+
+   
 
     #endregion
 
@@ -392,35 +452,17 @@ public class Chronograph : IDisposable
     {
         var ret = new List<IDisposable>();
 
-        if (_parameters.Count != 0)
+        if (_parameters.Count == 0)
         {
-            foreach (var paramKv in _parameters)
-            {
-                ret.Add(_logger.PushProperty(paramKv.Key, paramKv.Value));
-            }
+            return ret;
+        }
+
+        foreach (var paramKv in _parameters)
+        {
+            ret.Add(_logger.PushProperty(paramKv.Key, paramKv.Value));
         }
 
         return ret;
-    }
-
-    private string PrepareActionDescription(string actionDescription)
-    {
-        if (string.IsNullOrEmpty(actionDescription))
-        {
-            return string.Empty;
-        }
-
-        if (!char.IsUpper(actionDescription[0]))
-        {
-            return actionDescription;
-        }
-
-        StringBuilder prepared = new(actionDescription)
-        {
-            [0] = char.ToUpper(actionDescription[0])
-        };
-
-        return prepared.ToString();
     }
 
     #endregion

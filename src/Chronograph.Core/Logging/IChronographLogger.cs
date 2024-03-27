@@ -1,7 +1,7 @@
 ﻿namespace Chronograph.Core.Logging;
 
 /// <summary>
-/// Common interface for all Chronograph underlying loggers
+/// Common interface for all Chronograph underlying loggers.
 /// </summary>
 public interface IChronographLogger
 {

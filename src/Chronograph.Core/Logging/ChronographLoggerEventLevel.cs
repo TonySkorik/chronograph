@@ -1,7 +1,7 @@
 ﻿namespace Chronograph.Core.Logging;
 
 /// <summary>
-/// Chronograph logger-agnostic abstract event levels
+/// Chronograph logger-agnostic abstract event levels.
 /// </summary>
 public enum ChronographLoggerEventLevel
 {
