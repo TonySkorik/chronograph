@@ -1,0 +1,43 @@
+name: Build & Publish NuGet Package
+
+on:
+  push:
+    tags: 
+    - 'v*'
+
+env:
+  NUGET_SOURCE_URL: 'https://api.nuget.org/v3/index.json'
+  PACKAGE_OUTPUT_DIRECTORY: ${{ github.workspace }}/output
+
+jobs:
+
+  build_publish_nuget:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+    - name: Get version
+      id: get_version
+      uses: battila7/get-version-action@v2
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Pack project Chronograph.Core
+      run: dotnet pack src/Chronograph.Core/Chronograph.Core.csproj --no-restore --no-build --configuration Release --include-symbols -p:PackageVersion=${{ steps.get_version.outputs.version-without-v }} --output ${{ env.PACKAGE_OUTPUT_DIRECTORY }}
+    - name: Pack project Chronograph.Microsoft.Extensions.Logging
+      run: dotnet pack src/Chronograph.Microsoft.Extensions.Logging/Chronograph.Microsoft.Extensions.Logging.csproj --no-restore --no-build --configuration Release --include-symbols -p:PackageVersion=${{ steps.get_version.outputs.version-without-v }} --output ${{ env.PACKAGE_OUTPUT_DIRECTORY }}
+    - name: Pack project Chronograph.Serilog
+      run: dotnet pack src/Chronograph.Serilog/Chronograph.Serilog.csproj --no-restore --no-build --configuration Release --include-symbols -p:PackageVersion=${{ steps.get_version.outputs.version-without-v }} --output ${{ env.PACKAGE_OUTPUT_DIRECTORY }}
+
+    - name: Push package
+      run: dotnet nuget push ${{ env.PACKAGE_OUTPUT_DIRECTORY }}/*.nupkg -s ${{ env.NUGET_SOURCE_URL }} -k ${{ secrets.NUGET_API_KEY }} --skip-duplicate
