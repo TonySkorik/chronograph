@@ -16,7 +16,7 @@ jobs:
   build:
     env:
       BUILD_CONFIG: 'Release'
-      SOLUTION: './src/Chronograph.sln'
+      SOLUTION: './Chronograph.sln'
       
     runs-on: ubuntu-latest
 
