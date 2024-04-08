@@ -88,11 +88,22 @@ The result of the both calls will be as follows (operation duration may vary dep
 To specify action description parameters, use either of the following.
 
 ```csharp
-Logger.Chrono().Start("{parametrized} action description with {parameterCount} parameters", "first_parameter_value", 2)
+Logger.Chrono()
+    .Start(
+        "{parametrized} action description with {parameterCount} parameters", 
+        "first_parameter_value", 
+        2
+    )
 ```
 
 ```csharp
-Logger.Chrono().For("{parametrized} action description with {parameterCount} parameters", "first_parameter_value", 2).Start()
+Logger.Chrono()
+    .For(
+        "{parametrized} action description with {parameterCount} parameters", 
+        "first_parameter_value", 
+        2
+    )
+    .Start()
 ```
 
 The result of the both calls will be as follows (operation duration may vary depending on operation to time).
