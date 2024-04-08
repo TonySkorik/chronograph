@@ -239,4 +239,34 @@ public class TestMicrosoftExtensionsLogger
         logger.WrittenEvents.Should().Contain(
             m => m.message.Contains("Long runing operation 1567 detected"));
     }
+
+    [TestMethod]
+    public async Task TestLongRunningOperationWithParametersWithSpecificMessageWithParameters()
+    {
+        var logger = GetLogger();
+
+        int testValue = 0;
+
+        var chrono = logger.Chrono()
+            .For("test operation {IntParameter}", 42)
+            .WithLongRunningOperationReport(
+                TimeSpan.FromMilliseconds(1),
+                "Long runing operation {LongParameter} detected",
+                // ReSharper disable once AccessToModifiedClosure | Justification - intended capture
+                () => testValue)
+            .Start();
+
+        testValue = 1567;
+
+        await Task.Delay(TimeSpan.FromMilliseconds(2));
+
+        chrono.Dispose();
+
+        logger.WrittenEvents.Should().HaveCount(3);
+
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started test operation"));
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished test operation"));
+        logger.WrittenEvents.Should().Contain(
+            m => m.message.Contains("Long runing operation 1567 detected"));
+    }
 }
