@@ -439,7 +439,7 @@ public class Chronograph : IDisposable
                 {
                     var longRunningOperationReportTemplate =
                         string.IsNullOrEmpty(_longRunningOperationReportMessage)
-                            ? $"{_actionDescription} took a long time to finish >({_longRunningOperationThreshold.Value!})"
+                            ? $"{_actionDescription} took a long time to finish >({_longRunningOperationThreshold.Value!}) : [{Elapsed:g}]"
                             : _longRunningOperationReportMessage;
 
                     _logger.Write(
