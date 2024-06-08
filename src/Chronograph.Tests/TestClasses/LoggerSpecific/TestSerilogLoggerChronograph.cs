@@ -8,7 +8,7 @@ namespace Chronograph.Tests.TestClasses.LoggerSpecific;
 [TestClass]
 public class TestSerilogLoggerChronograph : TestChronograph
 {
-	public override (Core.Chronograph, ITestLogger) GetChronographAndLogger()
+	protected override (Core.Chronograph, ITestLogger) GetChronographAndLogger()
 	{
 		TestSerilogLogger logger = new();
 		var chrono = logger.Chrono();

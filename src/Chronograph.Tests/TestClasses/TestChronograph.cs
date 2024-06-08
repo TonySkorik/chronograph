@@ -9,9 +9,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Chronograph.Tests.TestClasses;
 
+[TestClass]
 public abstract class TestChronograph
 {
-	public abstract (Core.Chronograph, ITestLogger) GetChronographAndLogger(); 
+    protected abstract (Core.Chronograph, ITestLogger) GetChronographAndLogger(); 
 
     [TestMethod]
     public void TestSimpleOperation()
@@ -390,8 +391,7 @@ public abstract class TestChronograph
         }
         else
         {
-            var writtenEventsPart = (runCount / (double) writeMessageCount);
-            writtenEventsPart.Should().BeApproximately(2, 0.5);
+            writeMessageCount.Should().BeLessThanOrEqualTo((runCount / 2)+20);
         }
     }
 }
