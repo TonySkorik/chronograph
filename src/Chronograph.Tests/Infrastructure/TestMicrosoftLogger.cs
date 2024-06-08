@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Chronograph.Core.Logging;
+using Chronograph.Microsoft.Extensions.Logging.Logging;
+using Chronograph.Tests.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace Chronograph.Tests.Infrastructure;
 
-internal class TestMicrosoftLogger : ILogger
+internal class TestMicrosoftLogger : ILogger, ITestLogger
 {
     private class MicrosoftLoggerScopeMock<TState> : IDisposable
     {
@@ -19,12 +22,18 @@ internal class TestMicrosoftLogger : ILogger
         { }
     }
 
-    public List<(LogLevel level, EventId eventId, Exception ex, string message)> WrittenEvents { set; get; } = [];
+    public List<(ChronographLoggerEventLevel level, string message)> WrittenEvents { set; get; } = [];
 
-    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+    public void Log<TState>(
+        LogLevel logLevel,
+        EventId eventId,
+        TState state,
+        Exception exception,
+        Func<TState, Exception, string> formatter)
     {
         var rendered = formatter.Invoke(state, exception);
-        WrittenEvents.Add((logLevel, eventId, exception, rendered));
+        
+        WrittenEvents.Add((MicrosoftExtensionsChronographLogger.ToAbstractEventLevel(logLevel), rendered));
     }
 
     public bool IsEnabled(LogLevel logLevel)

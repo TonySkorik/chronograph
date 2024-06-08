@@ -30,8 +30,8 @@ internal class SerilogChronographLogger : IChronographLogger
 	public IDisposable PushProperty(string propertyName, object propertyValue)
 		=> LogContext.PushProperty(propertyName, propertyValue);
 
-	private static LogEventLevel ToTargetEventLevel(ChronographLoggerEventLevel abastractEventLevel) =>
-		abastractEventLevel switch
+	public static LogEventLevel ToTargetEventLevel(ChronographLoggerEventLevel abstractEventLevel) =>
+		abstractEventLevel switch
 		{
 			ChronographLoggerEventLevel.Information => LogEventLevel.Information,
 			ChronographLoggerEventLevel.Warning => LogEventLevel.Warning,
@@ -39,6 +39,18 @@ internal class SerilogChronographLogger : IChronographLogger
 			ChronographLoggerEventLevel.Verbose => LogEventLevel.Verbose,
 			ChronographLoggerEventLevel.Debug => LogEventLevel.Debug,
 			ChronographLoggerEventLevel.Fatal => LogEventLevel.Fatal,
-			_ => throw new ArgumentOutOfRangeException(nameof(abastractEventLevel), abastractEventLevel, null)
+			_ => throw new ArgumentOutOfRangeException(nameof(abstractEventLevel), abstractEventLevel, null)
+		};
+
+	public static ChronographLoggerEventLevel ToAbstractEventLevel(LogEventLevel targetEventLevel) =>
+		targetEventLevel switch
+		{
+			LogEventLevel.Information => ChronographLoggerEventLevel.Information,
+			LogEventLevel.Warning => ChronographLoggerEventLevel.Warning,
+			LogEventLevel.Error => ChronographLoggerEventLevel.Error,
+			LogEventLevel.Verbose => ChronographLoggerEventLevel.Verbose,
+			LogEventLevel.Debug => ChronographLoggerEventLevel.Debug,
+			LogEventLevel.Fatal => ChronographLoggerEventLevel.Fatal,
+			_ => throw new ArgumentOutOfRangeException(nameof(targetEventLevel), targetEventLevel, null)
 		};
 }

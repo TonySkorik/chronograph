@@ -1,4 +1,5 @@
-﻿using Chronograph.Core.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Chronograph.Core.Logging;
 using Chronograph.Microsoft.Extensions.Logging.Logging;
 
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,8 @@ namespace Chronograph.Microsoft.Extensions.Logging.Helpers;
 /// <summary>
 /// Helper class for creating chronographs for Microsoft.Extensions.Logging logger.
 /// </summary>
+[SuppressMessage("ReSharper", "MemberCanBeInternal")]
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public static class MicrosoftExtensionsLoggerHelper
 {
 	/// <summary>
@@ -19,7 +22,7 @@ public static class MicrosoftExtensionsLoggerHelper
 	/// Creates the stopped chronograph. Used to build chronograph using fluent interface.
 	/// </summary>
 	/// <param name="targetLogger">The target logger.</param>
-	/// <remarks>The returned chronograph is <c>not started by default</c> so you need to call <c>Start()</c> method explicitly upon build completion.</remarks>
+	/// <remarks>The returned chronograph is <c>not started by default</c>, so you need to call <c>Start()</c> method explicitly upon build completion.</remarks>
 	public static Core.Chronograph Chrono(this ILogger targetLogger)
 	{
 		var microsoftExtensionsChronoLogger = new MicrosoftExtensionsChronographLogger(targetLogger);
@@ -33,7 +36,7 @@ public static class MicrosoftExtensionsLoggerHelper
 	/// </summary>
 	/// <param name="targetLogger">The target logger.</param>
 	/// <param name="chronographEventLevel">The chronograph log messages event level.</param>
-	/// <remarks>The returned chronograph is <c>not started by default</c> so you need to call <c>Start()</c> method explicitly upon build completion.</remarks>
+	/// <remarks>The returned chronograph is <c>not started by default</c>, so you need to call <c>Start()</c> method explicitly upon build completion.</remarks>
 	public static Core.Chronograph Chrono(this ILogger targetLogger, ChronographLoggerEventLevel chronographEventLevel)
 	{
 		var microsoftExtensionsChronoLogger = new MicrosoftExtensionsChronographLogger(targetLogger);

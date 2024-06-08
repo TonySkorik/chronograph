@@ -1,13 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
-
 using Chronograph.Core.Infrastructure;
 using Chronograph.Core.Logging;
-
-// ReSharper disable MemberCanBePrivate.Global | Justification - public API
-// ReSharper disable MemberCanBeInternal | Justification - public API
-// ReSharper disable UnusedMember.Global | Justification - public API
 
 namespace Chronograph.Core;
 
@@ -15,7 +9,11 @@ namespace Chronograph.Core;
 /// Represents chronograph which writes operation timing information to serilog.
 /// </summary>
 /// <remarks>Uses <c>using()</c> scope Dispose pattern. Uses scope-modified closures to get timed operation results. May require some ReSharper "Access to modified closure" messages suppression attributes or comments.</remarks>
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+[SuppressMessage("ReSharper", "MemberCanBeInternal")]
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
+[SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
 public class Chronograph : IDisposable
 {
     /// <summary>
@@ -40,6 +38,10 @@ public class Chronograph : IDisposable
     private string _actionDescription;
     private string _endActionMessageTemplate;
     private Func<object>[] _countProviders;
+
+    private readonly Random _random = new (DateTime.Now.Millisecond);
+    private bool _shouldWriteMessagesToLogger = true;
+    private bool _shouldAlwaysReportLongRuningOperations = true;
 
     private TimeSpan? _longRunningOperationThreshold;
     private string _longRunningOperationReportMessage;
@@ -290,6 +292,34 @@ public class Chronograph : IDisposable
     }
 
     /// <summary>
+    /// Add output messages sampling.
+    /// </summary>
+    /// <param name="samplingFactor">
+    /// The sampling factor between 0 and 100.
+    /// 0 disables all message writes.
+    /// 100 means that every message will be written to the logger.
+    /// 50 means that roughly the 50% of messages will be written to the logger.
+    /// Any value greater than 100 is interpreted as 100.
+    /// </param>
+    /// <param name="shouldAlwaysReportLongRunningOperations">
+    /// Is set to <c>true</c> - long-running operations will be reported regardless of the <paramref name="samplingFactor"/>.
+    /// Is set to <c>false</c> - <paramref name="samplingFactor"/> should also be applied to the long-running operations report.
+    /// </param>
+    public Chronograph WithSampling(uint samplingFactor, bool shouldAlwaysReportLongRunningOperations = true)
+    {
+        _shouldWriteMessagesToLogger = samplingFactor switch
+        {
+            0 => false,
+            >= 100 => true,
+            _ => _random.Next(1, 101) <= samplingFactor
+        };
+
+        _shouldAlwaysReportLongRuningOperations = shouldAlwaysReportLongRunningOperations;
+
+        return this;
+    }
+
+    /// <summary>
     /// Adds action description which will be used to report start and an end. Optionally specifies action description serilog template parameters.
     /// </summary>
     /// <param name="actionDescriptionTemplate">The action description message template.</param>
@@ -340,17 +370,20 @@ public class Chronograph : IDisposable
         _wasEverStarted = true;
 
         _onStartAction?.Invoke(_actionDescriptionParameters);
-        
-        if (_actionDescriptionParameters is {Count: > 0})
+
+        if (_shouldWriteMessagesToLogger)
         {
-            _logger.Write(
-                _eventLevel,
-                $"Started {_actionDescription}.",
-                _actionDescriptionParameters.ToArray());
-        }
-        else
-        {
-            _logger.Write(_eventLevel, $"Started {_actionDescription}.");
+            if (_actionDescriptionParameters is {Count: > 0})
+            {
+                _logger.Write(
+                    _eventLevel,
+                    $"Started {_actionDescription}.",
+                    _actionDescriptionParameters.ToArray());
+            }
+            else
+            {
+                _logger.Write(_eventLevel, $"Started {_actionDescription}.");
+            }
         }
 
         _stopwatch.Start();
@@ -383,18 +416,21 @@ public class Chronograph : IDisposable
     /// </remarks>
     public void Dispose(string endMessageTemplate, params Func<object>[] countProviders)
     {
-        if (_endActionMessageTemplate is not null)
+        if (_shouldWriteMessagesToLogger)
         {
-            _logger.Write(
-                ChronographLoggerEventLevel.Warning,
-                $"Looks like the end message template for operation '{_actionDescription}' was previously configured to '{_endActionMessageTemplate}', it will be overridden by specified '{endMessageTemplate}' message");
-        }
+            if (_endActionMessageTemplate is not null)
+            {
+                _logger.Write(
+                    ChronographLoggerEventLevel.Warning,
+                    $"Looks like the end message template for operation '{_actionDescription}' was previously configured to '{_endActionMessageTemplate}', it will be overridden by specified '{endMessageTemplate}' message");
+            }
 
-        if (_countProviders is { Length: > 0 })
-        {
-            _logger.Write(
-                ChronographLoggerEventLevel.Warning,
-                $"Looks like the {_countProviders.Length} parameter provider functions for end message template were previously configured, they will be overridden by specified {countProviders.Length} functions");
+            if (_countProviders is {Length: > 0})
+            {
+                _logger.Write(
+                    ChronographLoggerEventLevel.Warning,
+                    $"Looks like the {_countProviders.Length} parameter provider functions for end message template were previously configured, they will be overridden by specified {countProviders.Length} functions");
+            }
         }
 
         _countProviders = countProviders;
@@ -464,19 +500,23 @@ public class Chronograph : IDisposable
                     : $"Finished {_actionDescription}. {_endActionMessageTemplate}. [{{operationDuration}}]";
 
                 _onEndAction?.Invoke(_stopwatch, actionDescriptionParameterArray);
-                
-                _logger.Write(
-                    _eventLevel,
-                    finalTemplate,
-                    actionDescriptionParameterArray);
 
-                if (isLongRunningOperation)
+                if (_shouldWriteMessagesToLogger)
+                {
+                    _logger.Write(
+                        _eventLevel,
+                        finalTemplate,
+                        actionDescriptionParameterArray);
+                }
+
+                if (isLongRunningOperation 
+                    && (_shouldAlwaysReportLongRuningOperations || _shouldWriteMessagesToLogger))
                 {
                     var longRunningOperationReportTemplate =
                         string.IsNullOrEmpty(_longRunningOperationReportMessage)
                             ? $"{_actionDescription} took a long time to finish >({_longRunningOperationThreshold.Value!}) : [{Elapsed:g}]"
                             : _longRunningOperationReportMessage;
-
+                        
                     _logger.Write(
                         _eventLevel,
                         longRunningOperationReportTemplate,

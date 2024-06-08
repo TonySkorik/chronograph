@@ -29,8 +29,8 @@ internal class MicrosoftExtensionsChronographLogger : IChronographLogger
 		// ReSharper disable once TemplateIsNotCompileTimeConstantProblem
 		=> _logger.BeginScope(propertyName, propertyValue);
 
-	private static LogLevel ToTargetEventLevel(ChronographLoggerEventLevel abastractEventLevel) =>
-		abastractEventLevel switch
+	public static LogLevel ToTargetEventLevel(ChronographLoggerEventLevel abstractEventLevel) =>
+		abstractEventLevel switch
 		{
 			ChronographLoggerEventLevel.Information => LogLevel.Information,
 			ChronographLoggerEventLevel.Warning => LogLevel.Warning,
@@ -38,6 +38,18 @@ internal class MicrosoftExtensionsChronographLogger : IChronographLogger
 			ChronographLoggerEventLevel.Verbose => LogLevel.Trace,
 			ChronographLoggerEventLevel.Debug => LogLevel.Debug,
 			ChronographLoggerEventLevel.Fatal => LogLevel.Critical,
-			_ => throw new ArgumentOutOfRangeException(nameof(abastractEventLevel), abastractEventLevel, null)
+			_ => throw new ArgumentOutOfRangeException(nameof(abstractEventLevel), abstractEventLevel, null)
+		};
+
+	public static ChronographLoggerEventLevel ToAbstractEventLevel(LogLevel targetEventLevel) =>
+		targetEventLevel switch
+		{
+			LogLevel.Information => ChronographLoggerEventLevel.Information,
+			LogLevel.Warning => ChronographLoggerEventLevel.Warning,
+			LogLevel.Error => ChronographLoggerEventLevel.Error,
+			LogLevel.Trace => ChronographLoggerEventLevel.Verbose,
+			LogLevel.Debug => ChronographLoggerEventLevel.Debug,
+			LogLevel.Critical => ChronographLoggerEventLevel.Fatal,
+			_ => throw new ArgumentOutOfRangeException(nameof(targetEventLevel), targetEventLevel, null)
 		};
 }

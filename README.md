@@ -43,6 +43,15 @@ There can be multiple action description and end action report message template 
 
 Action description lowercasing and punctuation is automatic, so there is no need to lower/upper-case action description message or write full stops in message templates.
 
+## Default event level
+
+The default event level for each concrete logger messages can be configured using static specific logger helper class `DefaultChronographEventLevel` property.
+
+For `Microsoft.Extensions.Logging` this helper class is called `MicrosoftExtensionsLoggerHelper`.
+For `Serilog` this helper class is called `SerilogLoggerHelper`.
+
+The default event level for all of the concrete loggers is `ChronographLoggerEventLevel.Information`.
+
 ## Message enrichment
 
 `Chronograph` enriches all end ('Finished xxx') messages with the following field:
@@ -190,7 +199,7 @@ chrono.Dispose(
 
 You can set up the chronograph to issue standardised or custom message when the operation is running longer than some set amount of time.
 
-To do so use either of the `WithLongRunningOperationReport` method overloads.
+To do so use either of the `WithLongRunningOperationReport` builder method overloads.
 
 ```csharp
 Chronograph WithLongRunningOperationReport(
@@ -212,8 +221,39 @@ $"{specified action description here} took a long time to finish >({specified lo
 
 The second overload `WithLongRunningOperationReport` with `Func<object>[]` formal parameter works the same as the similar `Report` oveload does. It evaluates the functions upon message rendering allowing for closures to report some values that will be changed during the timed opertaion run.
 
+## On start and on end operation actions
+
+Sometimes it is useful to call some code on start and/or on end of the operation chronograph.
+
+To register such action for start operation use `WithOnStartAction(Action<IReadOnlyList<object>> onStartAction)` builder method.
+This action has a single argument `IReadOnlyList<object>` that contains all the start action parameters if any.
+This action gets called before chronograph writes the start action message.
+
+To register such action for end operation use `WithOnEndAction(Action<Stopwatch, IReadOnlyList<object>> onEndAction)` builder method.
+This action has two arguments : an internal `Stopwatch` instance (stopped by the time the action is called) and a `IReadOnlyList<object>` with all of the end action parameters that contain specfied start action parameters, end action parameters and a string, containing elapsed operation time.
+This action gets called before chronograph writes the end action message.
+
+```csharp
+var chrono = chronograph
+    .For("test operation {IntParameter}", 42)
+    .Report("Operation result {IntParameter}", () => 1567)
+    .WithOnStartAction((parameters) => { /*some code here*/ })
+    .WithOnEndAction((sw, parameters) => { /*some code here*/ })
+    .Start();
+```
+
+## Sampling
+
+For cases when the chronograph wraps a frequently called code, it's beneficial to output only some of the start/end action messages and reports to the logger.
+This is where sampling can be handty. To enable message smapling call the `WithSampling(uint samplingFactor, bool shouldAlwaysReportLongRunningOperations = true)` builder method.
+
+This method have two parameters.
+
+* `samplingFactor`, which is a value between 1 and 100 that indicates the rough percentage of the messages to output.
+* `shouldAlwaysReportLongRunningOperations`, which indicates whether the sampling factor should appy to long running operation report if it is enabled.
+
+The sampling is implemented by getting a random value between 1 and 100 at the chronograph creation and checking `samplingFactor` against this value.
+
 ---
 
-> Thanks for reading this.
-> Hope this documentation helped you anyhow.
-> If you know how to improve it, don't hesitate to suggest any changes by pull request.
+> If you know how to improve this documentation, don't hesitate to suggest any changes by pull request.

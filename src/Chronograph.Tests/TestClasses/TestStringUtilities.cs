@@ -1,5 +1,4 @@
 ﻿using Chronograph.Core.Infrastructure;
-using Chronograph.Tests.Infrastructure;
 using Chronograph.Tests.Model;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

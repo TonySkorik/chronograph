@@ -1,16 +1,19 @@
 ﻿using System.Text;
+using Chronograph.Core.Logging;
+using Chronograph.Serilog.Logging;
+using Chronograph.Tests.Abstractions;
 using Serilog;
 using Serilog.Events;
 
 namespace Chronograph.Tests.Infrastructure;
 
-internal class TestSerilogLogger : ILogger
+internal class TestSerilogLogger : ILogger, ITestLogger
 {
-    public List<(LogEvent logEvent, string message)> WrittenEvents { set; get; } = [];
+    public List<(ChronographLoggerEventLevel level, string message)> WrittenEvents { set; get; } = [];
 
     public void Write(LogEvent logEvent)
     {
-        WrittenEvents.Add((logEvent, RenderLogMessage(logEvent)));
+        WrittenEvents.Add((SerilogChronographLogger.ToAbstractEventLevel(logEvent.Level), RenderLogMessage(logEvent)));
     }
 
     private string RenderLogMessage(LogEvent logEvent)
