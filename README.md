@@ -261,6 +261,17 @@ var chrono = chronograph
 For cases when the chronograph wraps a frequently called code, it's beneficial to output only some of the start/end action messages and reports to the logger.
 This is where sampling can be handty. To enable message smapling call the `WithSampling(uint samplingFactor, bool shouldAlwaysReportLongRunningOperations = true)` builder method.
 
+```csharp
+var chrono = chronograph
+    .For("test operation {IntParameter}", 42)
+    .WithLongRunningOperationReport(
+        TimeSpan.FromMilliseconds(1),
+        "Long running operation {LongParameter} detected",
+        () => 1567)
+    .WithSampling(50, shouldAlwaysReportLongRunningOperations: false)
+    .Start();
+```
+
 This method have two parameters.
 
 * `samplingFactor`, which is a value between 1 and 100 that indicates the rough percentage of the messages to output.
