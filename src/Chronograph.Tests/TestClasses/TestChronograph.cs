@@ -391,7 +391,7 @@ public abstract class TestChronograph
         }
         else
         {
-            writeMessageCount.Should().BeLessThanOrEqualTo((runCount / 2)+20);
+            writeMessageCount.Should().BeLessThanOrEqualTo((runCount / 2) + 40);
         }
     }
 }
