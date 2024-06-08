@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 using Chronograph.Core.Infrastructure;
@@ -14,15 +15,16 @@ namespace Chronograph.Core;
 /// Represents chronograph which writes operation timing information to serilog.
 /// </summary>
 /// <remarks>Uses <c>using()</c> scope Dispose pattern. Uses scope-modified closures to get timed operation results. May require some ReSharper "Access to modified closure" messages suppression attributes or comments.</remarks>
+[SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
 public class Chronograph : IDisposable
 {
     /// <summary>
     /// The name of the structured logging parameter that contains timed operation run time in milliseconds. 
     /// </summary>
-    public const string OperationDurationMilliseceondsLoggerParameterName = "OperationDurationMilliseceonds";
+    public const string OperationDurationMillisecondsLoggerParameterName = "OperationDurationMilliseceonds";
     
     /// <summary>
-    /// The name of the structured logging parameter that indicates that the timed operation is considered long-runing.
+    /// The name of the structured logging parameter that indicates that the timed operation is considered long-running.
     /// </summary>
     public const string IsLongRunningOperationLoggerParameterName = "IsLongRunningOperation";
     
@@ -30,6 +32,9 @@ public class Chronograph : IDisposable
     private readonly IChronographLogger _logger;
     private readonly Dictionary<string, object> _parameters = new();
     private readonly List<object> _actionDescriptionParameters = [];
+
+    private Action<Stopwatch,  IReadOnlyList<object>> _onEndAction;
+    private Action<IReadOnlyList<object>> _onStartAction;
 
     private ChronographLoggerEventLevel _eventLevel;
     private string _actionDescription;
@@ -106,7 +111,7 @@ public class Chronograph : IDisposable
     /// <example>
     /// <c>
     /// using(Log.CreateChronograph("operation description {withParameter}", operationDescriptionParameter)){
-    ///		OpertaionToTime();
+    ///		OperationToTime();
     /// }
     /// </c>
     /// </example>
@@ -144,8 +149,8 @@ public class Chronograph : IDisposable
     /// <example>
     /// <c>
     /// var targetDictionary = new Dictionary&lt;int,int&gt;();
-    /// using(Log.CreateChronograph("operation description", "got dictionary entries from server {countParamter}", ()=>targetDictionary.Count)){
-    ///		targetDictionary = GetDicitonaryEntries();
+    /// using(Log.CreateChronograph("operation description", "got dictionary entries from server {countParameter}", ()=>targetDictionary.Count)){
+    ///		targetDictionary = GetDictionaryEntries();
     /// }
     /// </c>
     /// </example>
@@ -174,7 +179,7 @@ public class Chronograph : IDisposable
     /// Sets the chronograph <see cref="LongRunningOperationThreshold"/> to the specified value and enables long-running operation reporting.
     /// </summary>
     /// <param name="longRunningOperationThreshold">The exclusive threshold after which the opertaion is considered to be long-running.</param>
-    /// <param name="longRunningOperationReportMessage">The optional long running operation report message. If not provided, thedefault message will be used.</param>
+    /// <param name="longRunningOperationReportMessage">The optional long-running operation report message. If not provided, the default message will be used.</param>
     public Chronograph WithLongRunningOperationReport(
         TimeSpan longRunningOperationThreshold,
         string longRunningOperationReportMessage = null)
@@ -190,7 +195,7 @@ public class Chronograph : IDisposable
     /// </summary>
     /// <param name="longRunningOperationThreshold">The exclusive threshold after which the opertaion is considered to be long-running.</param>
     /// <param name="longRunningOperationReportMessage">The optional long running operation report message. If not provided, thedefault message will be used.</param>
-    /// <param name="longRunningOperationReportMessageParameters">The optional long running operation report message parameters.</param>
+    /// <param name="longRunningOperationReportMessageParameters">The optional long-running operation report message parameters.</param>
     public Chronograph WithLongRunningOperationReport(
         TimeSpan longRunningOperationThreshold, 
         string longRunningOperationReportMessage = null,
@@ -208,7 +213,7 @@ public class Chronograph : IDisposable
     /// </summary>
     /// <param name="longRunningOperationThreshold">The exclusive threshold after which the opertaion is considered to be long-running.</param>
     /// <param name="longRunningOperationReportMessage">The optional long running operation report message. If not provided, thedefault message will be used.</param>
-    /// <param name="longRunningOperationReportMessageParameterProviders">The optional long running operation report message parameter providers.</param>
+    /// <param name="longRunningOperationReportMessageParameterProviders">The optional long-running operation report message parameter providers.</param>
     public Chronograph WithLongRunningOperationReport(
         TimeSpan longRunningOperationThreshold,
         string longRunningOperationReportMessage = null,
@@ -247,7 +252,7 @@ public class Chronograph : IDisposable
     /// <summary>
     /// Adds parameters to a logging context. Parameters will be used to enrich context when chronograph writes action completion messages.
     /// </summary>
-    /// <param name="parameters">The parameters dictionary.</param>
+    /// <param name="parameters">The parameter dictionary.</param>
     public Chronograph WithParameters(IEnumerable<KeyValuePair<string, object>> parameters)
     {
         foreach (var parameterKv in parameters)
@@ -255,6 +260,32 @@ public class Chronograph : IDisposable
             _parameters[parameterKv.Key] = parameterKv.Value;
         }
 
+        return this;
+    }
+
+    /// <summary>
+    /// Registers the action to be called on timed operation start.
+    /// </summary>
+    /// <param name="onStartAction">
+    /// The action to be called on internal stopwatch start before writing the start message to the logger.
+    /// The action is provided with rendered start action parameters.
+    /// </param>
+    public Chronograph WithOnStartAction(Action<IReadOnlyList<object>> onStartAction)
+    {
+        _onStartAction = onStartAction;
+        return this;
+    }
+    
+    /// <summary>
+    /// Registers the action to be called on timed operation end.
+    /// </summary>
+    /// <param name="onEndAction">
+    /// The action to be called on chronograph instance disposal before writing out the end message to the logger.
+    /// The action is provided with internal stopwatch instance and rendered end action parameters.
+    /// </param>
+    public Chronograph WithOnEndAction(Action<Stopwatch, IReadOnlyList<object>> onEndAction)
+    {
+        _onEndAction = onEndAction; 
         return this;
     }
 
@@ -308,7 +339,9 @@ public class Chronograph : IDisposable
     {
         _wasEverStarted = true;
 
-        if (_actionDescriptionParameters != null && _actionDescriptionParameters.Any())
+        _onStartAction?.Invoke(_actionDescriptionParameters);
+        
+        if (_actionDescriptionParameters is {Count: > 0})
         {
             _logger.Write(
                 _eventLevel,
@@ -343,10 +376,10 @@ public class Chronograph : IDisposable
     /// Disposes this chronograph instance, stopping the underlying Stopwatch and reporting action duration and writing down the specified end action message.
     /// </summary>
     /// <remarks>
-    /// If the end action mesage was configured by <see cref="Report(string, Func{object}[])"/> method 
+    /// If the end action message was configured by <see cref="Report(string, Func{object}[])"/> method 
     /// or via corresponding ctor, it will be overridden.
     /// If the count providers array was configured by <see cref="Report(string, Func{object}[])"/> method 
-    /// or via corresponding ctor, and <paramref name="countProviders"/> parameter cpecified, it will override previously configured count providers.    
+    /// or via corresponding ctor, and <paramref name="countProviders"/> parameter specified, it will override previously configured count providers.    
     /// </remarks>
     public void Dispose(string endMessageTemplate, params Func<object>[] countProviders)
     {
@@ -397,7 +430,7 @@ public class Chronograph : IDisposable
 
             _actionDescription = _actionDescription.EscapeCurlyBraces();
 
-            WithParameter(OperationDurationMilliseceondsLoggerParameterName, _stopwatch.Elapsed.TotalMilliseconds);
+            WithParameter(OperationDurationMillisecondsLoggerParameterName, _stopwatch.Elapsed.TotalMilliseconds);
 
             bool isLongRunningOperation = 
                 _longRunningOperationThreshold is { } longRunningOperationThreshold
@@ -430,6 +463,8 @@ public class Chronograph : IDisposable
                     ? $"Finished {_actionDescription}. [{{operationDuration}}]"
                     : $"Finished {_actionDescription}. {_endActionMessageTemplate}. [{{operationDuration}}]";
 
+                _onEndAction?.Invoke(_stopwatch, actionDescriptionParameterArray);
+                
                 _logger.Write(
                     _eventLevel,
                     finalTemplate,

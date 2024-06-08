@@ -1,5 +1,6 @@
 ﻿using Chronograph.Core.Infrastructure;
 using Chronograph.Tests.Infrastructure;
+using Chronograph.Tests.Model;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -25,7 +26,7 @@ public class TestStringUtilities
 
 		var escaped = testString.EscapeCurlyBraces();
 
-		escaped.Should().Be("test TestRecord {{ TestProperty0 = 42, TestPorperty1 = test, TestPorperty2 = 1567 }}");
+		escaped.Should().Be("test TestRecord {{ TestProperty0 = 42, TestProperty1 = test, TestProperty2 = 1567 }}");
 	}
 
 	[TestMethod]
@@ -51,11 +52,11 @@ public class TestStringUtilities
 	[TestMethod]
 	public void TestEscapeBraces_Mixed_SomeBracesEscaped()
 	{
-		var testString = "test {Parameter} value {Some values} {Parameter2} some more {Valu{what ever}es}";
+		var testString = "test {Parameter} value {Some values} {Parameter2} some more {Value{what ever}part}";
 
 		var escaped = testString.EscapeCurlyBraces();
 
-		escaped.Should().Be("test {Parameter} value {{Some values}} {Parameter2} some more {{Valu{{what ever}}es}}");
+		escaped.Should().Be("test {Parameter} value {{Some values}} {Parameter2} some more {{Value{{what ever}}part}}");
 	}
 
 	[TestMethod]

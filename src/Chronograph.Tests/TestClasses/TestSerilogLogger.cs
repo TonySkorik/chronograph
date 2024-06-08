@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using Chronograph.Core.Logging;
 using Chronograph.Serilog.Helpers;
 using Chronograph.Tests.Infrastructure;
+using Chronograph.Tests.Model;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog.Events;
@@ -101,14 +103,14 @@ public class TestSerilogLogger
 
         var chrono = logger.Chrono().For("test operation").Start();
 
-        chrono.Dispose("Test end mesage template");
+        chrono.Dispose("Test end message template");
 
         logger.WrittenEvents.Should().HaveCount(2);
         logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started test operation"));
         logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished test operation"));
 
         logger.WrittenEvents.Should().Contain(
-            m => m.message.Contains("Test end mesage template"));
+            m => m.message.Contains("Test end message template"));
     }
 
     [TestMethod]
@@ -118,7 +120,7 @@ public class TestSerilogLogger
 
         var chrono = logger.Chrono().For("test operation").Start();
 
-        chrono.Dispose("Test end mesage template testParameter={TestParameter}", () => 42);
+        chrono.Dispose("Test end message template testParameter={TestParameter}", () => 42);
 
         logger.WrittenEvents.Should().HaveCount(2);
         logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started test operation"));
@@ -142,7 +144,7 @@ public class TestSerilogLogger
             )
             .Start();
 
-        chrono.Dispose("Test end mesage template testParameter={TestParameter}", () => 43);
+        chrono.Dispose("Test end message template testParameter={TestParameter}", () => 43);
 
         logger.WrittenEvents.Should().HaveCount(4);
 
@@ -218,7 +220,7 @@ public class TestSerilogLogger
             .For("test operation {IntParameter}", 42)
             .WithLongRunningOperationReport(
                 TimeSpan.FromMilliseconds(1),
-                "Long runing operation {LongParameter} detected",
+                "Long running operation {LongParameter} detected",
                 1567L)
             .Start();
 
@@ -231,7 +233,7 @@ public class TestSerilogLogger
         logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started test operation"));
         logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished test operation"));
         logger.WrittenEvents.Should().Contain(
-            m => m.message.Contains("Long runing operation 1567 detected"));
+            m => m.message.Contains("Long running operation 1567 detected"));
     }
 
     [TestMethod]
@@ -245,7 +247,7 @@ public class TestSerilogLogger
             .For("test operation {IntParameter}", 42)
             .WithLongRunningOperationReport(
                 TimeSpan.FromMilliseconds(1),
-                "Long runing operation {LongParameter} detected",
+                "Long running operation {LongParameter} detected",
                 // ReSharper disable once AccessToModifiedClosure | Justification - intended capture
                 ()=> testValue)
             .Start();
@@ -261,6 +263,47 @@ public class TestSerilogLogger
         logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started test operation"));
         logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished test operation"));
         logger.WrittenEvents.Should().Contain(
-            m => m.message.Contains("Long runing operation 1567 detected"));
+            m => m.message.Contains("Long running operation 1567 detected"));
+    }
+
+    [TestMethod]
+    public async Task TestOnStartAndOnEndAction()
+    {
+        var logger = GetLogger();
+
+        IReadOnlyList<object> onStartParameters = null;
+
+        IReadOnlyList<object> onEndParameters = null;
+        Stopwatch onEndStopwatch = null;
+        
+        var chrono = logger.Chrono()
+            .For("test operation {IntParameter}", 42)
+            .Report("Operation result {IntParameter}", ()=> 1567)
+            .WithOnStartAction((parameters) =>
+            {
+                onStartParameters = parameters;
+            })
+            .WithOnEndAction((sw, parameters) => { 
+                onEndStopwatch = sw;
+                onEndParameters = parameters;
+            })
+            .Start();
+
+        await Task.Delay(TimeSpan.FromMilliseconds(2));
+
+        chrono.Dispose();
+        
+        onStartParameters.Should().NotBeNull();
+        onStartParameters.Count.Should().Be(1);
+        onStartParameters[0].Should().Be(42);
+        
+        onEndStopwatch.Should().NotBeNull();
+        onEndStopwatch.Elapsed.TotalMilliseconds.Should().BeGreaterThan(0);
+        
+        onEndParameters.Should().NotBeNull();
+        onEndParameters.Count.Should().Be(3); // +1 from start action parameters and +1 from elapsed
+        onEndParameters[0].Should().Be(42);
+        onEndParameters[1].Should().Be(1567);
+        onEndParameters[2].Should().Be(onEndStopwatch.Elapsed.ToString("g"));
     }
 }
