@@ -52,7 +52,7 @@ internal static class StringUtilities
             return target;
         }
 
-        // curly braces should be esacped only if there are spaces between them
+        // curly braces should be escaped only if there are spaces between them
         // to prevent escaping of structured logging parameter placeholders like {SomeParameter}
 
         StringBuilder escaped = new StringBuilder();
@@ -114,9 +114,9 @@ internal static class StringUtilities
                     j++;
                 }
 
-                // search for a space symbol between i and j
+                // search for a space symbol between the i and j
                 // if not found - don't escape anything
-                // if found - escape all the braces between i and j
+                // if found - escape all the braces between the i and j
                 
                 var substringBetweenBraces = target[i..j];
 

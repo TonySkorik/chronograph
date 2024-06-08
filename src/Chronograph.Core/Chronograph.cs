@@ -41,7 +41,7 @@ public class Chronograph : IDisposable
 
     private readonly Random _random = new (DateTime.Now.Millisecond);
     private bool _shouldWriteMessagesToLogger = true;
-    private bool _shouldAlwaysReportLongRuningOperations = true;
+    private bool _shouldAlwaysReportLongRunningOperations = true;
 
     private TimeSpan? _longRunningOperationThreshold;
     private string _longRunningOperationReportMessage;
@@ -314,7 +314,7 @@ public class Chronograph : IDisposable
             _ => _random.Next(1, 101) <= samplingFactor
         };
 
-        _shouldAlwaysReportLongRuningOperations = shouldAlwaysReportLongRunningOperations;
+        _shouldAlwaysReportLongRunningOperations = shouldAlwaysReportLongRunningOperations;
 
         return this;
     }
@@ -510,7 +510,7 @@ public class Chronograph : IDisposable
                 }
 
                 if (isLongRunningOperation 
-                    && (_shouldAlwaysReportLongRuningOperations || _shouldWriteMessagesToLogger))
+                    && (_shouldAlwaysReportLongRunningOperations || _shouldWriteMessagesToLogger))
                 {
                     var longRunningOperationReportTemplate =
                         string.IsNullOrEmpty(_longRunningOperationReportMessage)

@@ -39,6 +39,7 @@ internal class SerilogChronographLogger : IChronographLogger
 			ChronographLoggerEventLevel.Verbose => LogEventLevel.Verbose,
 			ChronographLoggerEventLevel.Debug => LogEventLevel.Debug,
 			ChronographLoggerEventLevel.Fatal => LogEventLevel.Fatal,
+			ChronographLoggerEventLevel.None => LogEventLevel.Verbose,
 			_ => throw new ArgumentOutOfRangeException(nameof(abstractEventLevel), abstractEventLevel, null)
 		};
 

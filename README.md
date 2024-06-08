@@ -43,7 +43,19 @@ There can be multiple action description and end action report message template 
 
 Action description lowercasing and punctuation is automatic, so there is no need to lower/upper-case action description message or write full stops in message templates.
 
-## Default event level
+## Event level
+
+The Chronograph uses its own event level `ChronographLoggerEventLevel` to abstract away the concrete logger event levels.
+
+Te supported event levels and their respective translations to `Microsoft.Extensions.Logging.Abstractions.LogLevel` and `Serilog.Events.LogEventLevel` loggers are
+
+* `Verbose` => `LogLevel.Trace`, `LogEventLevel.Verbose`
+* `Debug` => `LogLevel.Debug`, `LogEventLevel.Debug`
+* `Information` => `LogLevel.Information`, `LogEventLevel.Information`
+* `Warning` => `LogLevel.Warning`, `LogEventLevel.Warning`
+* `Error` => `LogLevel.Error`, `LogEventLevel.Error`
+* `Fatal` => `LogLevel.Critical`, `LogEventLevel.Fatal`
+* `None` => `LogLevel.None` applies only to `Microsoft.Extensions.Logging` logger
 
 The default event level for each concrete logger messages can be configured using static specific logger helper class `DefaultChronographEventLevel` property.
 
@@ -51,6 +63,8 @@ For `Microsoft.Extensions.Logging` this helper class is called `MicrosoftExtensi
 For `Serilog` this helper class is called `SerilogLoggerHelper`.
 
 The default event level for all of the concrete loggers is `ChronographLoggerEventLevel.Information`.
+
+The same class for each concrete logger contains static methods for converting abstract `ChronographLoggerEventLevel` event level to concrete one `ToTargetEventLevel` and backwards `ToAbstractEventLevel`.
 
 ## Message enrichment
 
@@ -250,7 +264,7 @@ This is where sampling can be handty. To enable message smapling call the `WithS
 This method have two parameters.
 
 * `samplingFactor`, which is a value between 1 and 100 that indicates the rough percentage of the messages to output.
-* `shouldAlwaysReportLongRunningOperations`, which indicates whether the sampling factor should appy to long running operation report if it is enabled.
+* `shouldAlwaysReportLongRunningOperations` (optional), which indicates whether the `samplingFactor` should apply to the long running operation report if it is enabled. By default long running operations got reported rgardless of the `samplingFactor`.
 
 The sampling is implemented by getting a random value between 1 and 100 at the chronograph creation and checking `samplingFactor` against this value.
 

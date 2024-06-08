@@ -33,5 +33,11 @@ public enum ChronographLoggerEventLevel
 	/// <summary>
 	/// The fatal event (aka. Critical).
 	/// </summary>
-	Fatal
+	Fatal,
+	
+	/// <summary>
+	/// The event level indicating that event should not be written at all.
+	/// Applies only to Microsoft.Extensions.Logging logger.
+	/// </summary>
+	None
 }

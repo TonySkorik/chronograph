@@ -38,6 +38,7 @@ internal class MicrosoftExtensionsChronographLogger : IChronographLogger
 			ChronographLoggerEventLevel.Verbose => LogLevel.Trace,
 			ChronographLoggerEventLevel.Debug => LogLevel.Debug,
 			ChronographLoggerEventLevel.Fatal => LogLevel.Critical,
+			ChronographLoggerEventLevel.None => LogLevel.None,
 			_ => throw new ArgumentOutOfRangeException(nameof(abstractEventLevel), abstractEventLevel, null)
 		};
 
@@ -50,6 +51,7 @@ internal class MicrosoftExtensionsChronographLogger : IChronographLogger
 			LogLevel.Trace => ChronographLoggerEventLevel.Verbose,
 			LogLevel.Debug => ChronographLoggerEventLevel.Debug,
 			LogLevel.Critical => ChronographLoggerEventLevel.Fatal,
+			LogLevel.None => ChronographLoggerEventLevel.None,
 			_ => throw new ArgumentOutOfRangeException(nameof(targetEventLevel), targetEventLevel, null)
 		};
 }
