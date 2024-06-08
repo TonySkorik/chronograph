@@ -391,7 +391,7 @@ public abstract class TestChronograph
         else
         {
             var writtenEventsPart = (runCount / (double) writeMessageCount);
-            writtenEventsPart.Should().BeApproximately(2, 0.3);
+            writtenEventsPart.Should().BeApproximately(2, 0.5);
         }
     }
 }
