@@ -1,5 +1,8 @@
 ﻿# Chronograph
 
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Ftonyskorik%2Fchronograph%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/tonyskorik/chronograph/goto?ref=main)
+[![NuGet Release][Chronograph-image]][Chronograph-nuget-url]
+
 `Chronograph` is an instrumentation object which encapsulates `Stopwatch` instance and serilog parametrized messages for operation start and end reporting.
 
 It implements `IDisposable` for convenient operation wrapping. 
@@ -282,3 +285,7 @@ The sampling is implemented by getting a random value between 1 and 100 at the c
 ---
 
 > If you know how to improve this documentation, don't hesitate to suggest any changes by pull request.
+
+[Chronograph-nuget-url]:https://www.nuget.org/packages/Chronograph.Microsoft.Extensions.Logging
+[Chronograph-image]:
+https://img.shields.io/nuget/v/Chronograph.Microsoft.Extensions.Logging.svg
