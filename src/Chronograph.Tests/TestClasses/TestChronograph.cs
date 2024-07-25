@@ -27,6 +27,19 @@ public abstract class TestChronograph
     }
 
     [TestMethod]
+    public void TestSimpleOperation_NoLowercasing()
+    {
+        var (chronograph, logger) = GetChronographAndLogger();
+        // note : we prefix action description with space to stop first letter of the message from being lowercased
+        var chrono = chronograph.For(" Test operation").Start();
+        chrono.Dispose();
+
+        logger.WrittenEvents.Should().HaveCount(2);
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started Test operation"));
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished Test operation"));
+    }
+
+    [TestMethod]
     public void TestSimpleOperationWithReport()
     {
         var (chronograph, logger) = GetChronographAndLogger();

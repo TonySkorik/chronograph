@@ -44,8 +44,6 @@ Where:
 
 There can be multiple action description and end action report message template parameters.
 
-Action description lowercasing and punctuation is automatic, so there is no need to lower/upper-case action description message or write full stops in message templates.
-
 ## Event level
 
 The Chronograph uses its own event level `ChronographLoggerEventLevel` to abstract away the concrete logger event levels.
@@ -100,14 +98,41 @@ using(Logger.Chrono().Start("action description"))
 }
 ```
 
-The result of the both calls will be as follows (operation duration may vary depending on operation to time).
+Or even shorter.
+
+```csharp
+using(Logger.Chrono("action description"))
+{
+    // operation to time
+}
+```
+
+The result of the all the above calls will be as follows (operation duration may vary depending on operation to time).
 
 ```csharp
 [16:28:38 INF] Started action description.
 [16:34:03 INF] Finished action description. [0:05:25.3627059]
 ```
 
-`Chrono()` method automatically sets the `LogEventLevel` to `Information` (you can edit this settings by modifying `LoggerHelper.ChronographEventLevel` property)
+`Chrono()` method automatically sets the `LogEventLevel` to `Information` (you can edit this settings by modifying `MicrosoftExtensionsLoggerHelper.DefaultChronographEventLevel` or `SerilogLoggerHelper.DefaultChronographEventLevel` property depending on which structured logging library you use).
+
+Action description lowercasing and punctuation is automatic, so there is no need to lower/upper-case action description message or write full stops in message templates.
+
+If you want to prevent automatic lowercasing of the action description message - prefix it with a space. That space will be removed and message will be outputted in the original casing.
+
+```csharp
+using(Logger.Chrono(" Action description"))
+{
+    // operation to time
+}
+```
+
+Will output action description in the original casing
+
+```csharp
+[16:28:38 INF] Started Action description.
+[16:34:03 INF] Finished Action description. [0:05:25.3627059]
+```
 
 ## Specifying parameters
 
@@ -140,6 +165,12 @@ The result of the both calls will be as follows (operation duration may vary dep
 ```
 
 Parameter values are `params` and optional.
+
+> Please note that when you are using parameterized messages or other extensions you need to explicitly `Start()` the chronograph. If you won't the `Chronograph` instance will issue a warning upon disposal.
+>
+> As a rule of thumb - call `Start()` in any case except for when using the most shorthand chronograph creation method : `Logger.Chrono("action description")`.
+>
+> Someday I will add a Roslyn analyzer to ensure that you do.
 
 ## Specifying end action report message
 

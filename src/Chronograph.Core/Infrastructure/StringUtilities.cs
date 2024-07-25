@@ -17,6 +17,14 @@ internal static class StringUtilities
 		{
 			return string.Empty;
 		}
+		
+		// dirty hack : to stop message first char from being lowercased or otherwise altered - prefix it with a space
+		if (actionDescription[0] == ' ')
+		{ 
+			// means that we don't want to lowercase first char
+			// just return actionDescription without first char
+			return actionDescription[1..];
+		}
 
 		if (!char.IsUpper(actionDescription[0]))
 		{
