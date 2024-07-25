@@ -7,7 +7,7 @@ using Serilog;
 namespace Chronograph.Serilog.Helpers;
 
 /// <summary>
-/// Helper class for creating chronographs for Serilog logger.
+/// Helper class for creating chronographs for Serilog <see cref="ILogger"/>.
 /// </summary>
 [SuppressMessage("ReSharper", "MemberCanBeInternal")]
 [SuppressMessage("ReSharper", "UnusedMember.Global")]

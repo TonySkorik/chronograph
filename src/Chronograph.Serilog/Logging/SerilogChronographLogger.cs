@@ -1,4 +1,5 @@
-﻿using Chronograph.Core.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Chronograph.Core.Logging;
 
 using Serilog;
 using Serilog.Context;
@@ -15,15 +16,15 @@ internal class SerilogChronographLogger : IChronographLogger
 		_logger = logger;
 	}
 
+	[SuppressMessage("ReSharper", "TemplateIsNotCompileTimeConstantProblem")]
 	public void Write(ChronographLoggerEventLevel level, string message)
 	{
-		// ReSharper disable once TemplateIsNotCompileTimeConstantProblem
 		_logger.Write(ToTargetEventLevel(level), message);
 	}
 
+	[SuppressMessage("ReSharper", "TemplateIsNotCompileTimeConstantProblem")]
 	public void Write(ChronographLoggerEventLevel level, string messageTemplate, params object[] propertyValues)
 	{
-		// ReSharper disable once TemplateIsNotCompileTimeConstantProblem
 		_logger.Write(ToTargetEventLevel(level), messageTemplate, propertyValues);
 	}
 

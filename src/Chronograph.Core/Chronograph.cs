@@ -180,7 +180,7 @@ public class Chronograph : IDisposable
     /// <summary>
     /// Sets the chronograph <see cref="LongRunningOperationThreshold"/> to the specified value and enables long-running operation reporting.
     /// </summary>
-    /// <param name="longRunningOperationThreshold">The exclusive threshold after which the opertaion is considered to be long-running.</param>
+    /// <param name="longRunningOperationThreshold">The exclusive threshold after which the operation is considered to be long-running.</param>
     /// <param name="longRunningOperationReportMessage">The optional long-running operation report message. If not provided, the default message will be used.</param>
     public Chronograph WithLongRunningOperationReport(
         TimeSpan longRunningOperationThreshold,
@@ -195,8 +195,8 @@ public class Chronograph : IDisposable
     /// <summary>
     /// Sets the chronograph <see cref="LongRunningOperationThreshold"/> to the specified value and enables long-running operation reporting.
     /// </summary>
-    /// <param name="longRunningOperationThreshold">The exclusive threshold after which the opertaion is considered to be long-running.</param>
-    /// <param name="longRunningOperationReportMessage">The optional long running operation report message. If not provided, thedefault message will be used.</param>
+    /// <param name="longRunningOperationThreshold">The exclusive threshold after which the operation is considered to be long-running.</param>
+    /// <param name="longRunningOperationReportMessage">The optional long-running operation report message. If not provided, the default message will be used.</param>
     /// <param name="longRunningOperationReportMessageParameters">The optional long-running operation report message parameters.</param>
     public Chronograph WithLongRunningOperationReport(
         TimeSpan longRunningOperationThreshold, 
@@ -213,8 +213,8 @@ public class Chronograph : IDisposable
     /// <summary>
     /// Sets the chronograph <see cref="LongRunningOperationThreshold"/> to the specified value and enables long-running operation reporting.
     /// </summary>
-    /// <param name="longRunningOperationThreshold">The exclusive threshold after which the opertaion is considered to be long-running.</param>
-    /// <param name="longRunningOperationReportMessage">The optional long running operation report message. If not provided, thedefault message will be used.</param>
+    /// <param name="longRunningOperationThreshold">The exclusive threshold after which the operation is considered to be long-running.</param>
+    /// <param name="longRunningOperationReportMessage">The optional long-running operation report message. If not provided, the default message will be used.</param>
     /// <param name="longRunningOperationReportMessageParameterProviders">The optional long-running operation report message parameter providers.</param>
     public Chronograph WithLongRunningOperationReport(
         TimeSpan longRunningOperationThreshold,

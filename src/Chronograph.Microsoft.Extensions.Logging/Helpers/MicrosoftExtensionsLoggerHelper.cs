@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Chronograph.Microsoft.Extensions.Logging.Helpers;
 
 /// <summary>
-/// Helper class for creating chronographs for Microsoft.Extensions.Logging logger.
+/// Helper class for creating chronographs for Microsoft.Extensions.Logging <see cref="ILogger"/> logger.
 /// </summary>
 [SuppressMessage("ReSharper", "MemberCanBeInternal")]
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
@@ -17,7 +17,7 @@ public static class MicrosoftExtensionsLoggerHelper
 	/// Gets or sets the default chronograph event level.
 	/// </summary>
 	public static ChronographLoggerEventLevel DefaultChronographEventLevel { get; set; } = ChronographLoggerEventLevel.Information;
-
+	
 	/// <summary>
 	/// Creates the stopped chronograph. Used to build chronograph using fluent interface.
 	/// </summary>

@@ -1,4 +1,5 @@
-﻿using Chronograph.Core.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Chronograph.Core.Logging;
 
 using Microsoft.Extensions.Logging;
 
@@ -13,20 +14,20 @@ internal class MicrosoftExtensionsChronographLogger : IChronographLogger
 		_logger = logger;
 	}
 
+	[SuppressMessage("ReSharper", "TemplateIsNotCompileTimeConstantProblem")]
 	public void Write(ChronographLoggerEventLevel level, string message)
 	{
-		// ReSharper disable once TemplateIsNotCompileTimeConstantProblem
 		_logger.Log(ToTargetEventLevel(level), message);
 	}
 
+	[SuppressMessage("ReSharper", "TemplateIsNotCompileTimeConstantProblem")]
 	public void Write(ChronographLoggerEventLevel level, string messageTemplate, params object[] propertyValues)
 	{
-		// ReSharper disable once TemplateIsNotCompileTimeConstantProblem
 		_logger.Log(ToTargetEventLevel(level), messageTemplate, propertyValues);
 	}
 
+	[SuppressMessage("ReSharper", "TemplateIsNotCompileTimeConstantProblem")]
 	public IDisposable PushProperty(string propertyName, object propertyValue)
-		// ReSharper disable once TemplateIsNotCompileTimeConstantProblem
 		=> _logger.BeginScope(propertyName, propertyValue);
 
 	public static LogLevel ToTargetEventLevel(ChronographLoggerEventLevel abstractEventLevel) =>
