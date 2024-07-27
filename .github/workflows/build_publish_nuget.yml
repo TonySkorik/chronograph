@@ -24,13 +24,10 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build --configuration Release --no-restore
     - name: Get version
       id: get_version
       uses: battila7/get-version-action@v2
-
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
 
     - name: Pack project Chronograph.Core
       run: dotnet pack src/Chronograph.Core/Chronograph.Core.csproj --no-restore --no-build --configuration Release --include-symbols -p:PackageVersion=${{ steps.get_version.outputs.version-without-v }} --output ${{ env.PACKAGE_OUTPUT_DIRECTORY }}
