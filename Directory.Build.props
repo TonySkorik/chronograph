@@ -1,0 +1,26 @@
+<Project>
+    <PropertyGroup Label="Package Attributes">
+        <Authors>Tony Skorik</Authors>
+        <PackageProjectUrl>https://github.com/TonySkorik/chronograph</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/TonySkorik/chronograph</RepositoryUrl>
+        <PackageIcon>chronograph.png</PackageIcon>
+        <PackageTags>timing;diagnostics;stopwatch</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryType>git</RepositoryType>
+        <Version>2.2.0</Version>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+    
+    <ItemGroup Condition=" '$(IsPackable)' == 'true' ">
+        <None Include="$(MSBuildThisFileDirectory)\README.md" Pack="true" PackagePath="\"/>
+        <None Include="$(MSBuildThisFileDirectory)\chronograph.png" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+</Project>

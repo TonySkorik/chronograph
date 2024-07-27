@@ -4,34 +4,20 @@
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<AssemblyName>Chronograph.Core</AssemblyName>
 		<RootNamespace>Chronograph.Core</RootNamespace>
-		<Authors>Tony Skorik</Authors>
-		<PackageProjectUrl>https://github.com/TonySkorik/chronograph</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/TonySkorik/chronograph</RepositoryUrl>
-		<PackageIcon>chronograph.png</PackageIcon>
-		<PackageTags>timing;diagnostics;stopwatch</PackageTags>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Description>This library provides Chronograph class core functionality. Chronograph is a library for convenient opertaions timing via `using` constructs and fluent syntax.</Description>
+		
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>true</ImplicitUsings>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<Version>2.0.2</Version>
 	</PropertyGroup>
-
-	<ItemGroup>
-		<None Include="..\..\chronograph.png">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-	</ItemGroup>
 	
 	<ItemGroup>
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
 	</ItemGroup>
-
-
+	
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>Chronograph.Tests</_Parameter1>

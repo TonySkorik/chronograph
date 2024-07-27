@@ -4,28 +4,16 @@
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<AssemblyName>Chronograph.Serilog</AssemblyName>
 		<RootNamespace>Chronograph.Serilog</RootNamespace>
-		<Authors>Tony Skorik</Authors>
-		<PackageProjectUrl>https://github.com/TonySkorik/chronograph</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/TonySkorik/chronograph</RepositoryUrl>
-		<PackageIcon>chronograph.png</PackageIcon>
-		<PackageTags>timing;diagnostics;stopwatch</PackageTags>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Description>This library provides Serilog logger integration logic for Chronograph.</Description>
+		
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>true</ImplicitUsings>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<Version>2.0.2</Version>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<None Include="..\..\chronograph.png">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Serilog" Version="2.12.0" />
