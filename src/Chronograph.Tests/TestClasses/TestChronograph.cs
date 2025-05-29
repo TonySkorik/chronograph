@@ -195,7 +195,34 @@ public abstract class TestChronograph
         logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished test operation"));
         logger.WrittenEvents.Should().Contain(m => m.message.Contains("testParameter=43"));
     }
-    
+
+    [TestMethod]
+    public void TestSimpleOperationWithReport_ReportContainsJson()
+    {
+        var (chronograph, logger) = GetChronographAndLogger();
+
+        var chrono = chronograph
+            .For("test operation")
+            .Report(
+                "Test report testCount={testCounterValue}, testSecondCount={testCounterValue2}, testJson = '{\"must\":[{\"key\":\"ship_to_list\",\"match\":{\"any\":[\"RU\"]}},{\"key\":\"segment_ids\",\"match\":{\"any\":[\"17647\"]}}]}",
+                () => 42,
+                () => 1567
+            )
+            .Start();
+
+        chrono.Dispose();
+
+        logger.WrittenEvents.Should().HaveCount(2);
+
+        // Check written messages
+
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started test operation"));
+
+        logger.WrittenEvents.Should().Contain(m =>
+            m.message.Contains("testJson = '{\"must\":[{\"key\":\"ship_to_list\",\"match\":{\"any\":[\"RU\"]}},{\"key\":\"segment_ids\",\"match\":{\"any\":[\"17647\"]}}]}")
+        );
+    }
+
     [TestMethod]
     public async Task TestLongRunningOperationWithoutParametersWithoutSpecificMessage()
     {

@@ -122,13 +122,18 @@ internal static class StringUtilities
                     j++;
                 }
 
-                // search for a space symbol between the i and j
+                // search for a space or " symbol between the i and j
                 // if not found - don't escape anything
                 // if found - escape all the braces between the i and j
                 
                 var substringBetweenBraces = target[i..j];
 
-                if (substringBetweenBraces.Contains(" "))
+                if (substringBetweenBraces.Contains(' ')
+					// May mean that the string is a JSON or similar format
+					|| substringBetweenBraces.Contains('\"') 
+					|| substringBetweenBraces.Contains('\'')
+					|| substringBetweenBraces.Contains('\\')
+				)
                 {
                     var escapedSubstring = substringBetweenBraces
                         .Replace("{", "{{")

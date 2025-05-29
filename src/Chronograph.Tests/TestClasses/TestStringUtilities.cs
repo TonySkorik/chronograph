@@ -87,4 +87,16 @@ public class TestStringUtilities
 
 		escaped.Should().Be("test {{Parameter{{value}}");
 	}
+
+	[TestMethod]
+	public void TestEscapeBraces_Json()
+	{
+		var testString = """
+		querying 200 similar data points from collection 'monetization.recs_vectors_with_item_segment_data_v3' using HTTP with raw filter string '{"must":[{"key":"ship_to_list","match":{"any":["RU"]}},{"key":"segment_ids","match":{"any":["17647"]}}]}'
+		""";
+
+		var escaped = testString.EscapeCurlyBraces();
+
+		escaped.Should().Be("querying 200 similar data points from collection 'monetization.recs_vectors_with_item_segment_data_v3' using HTTP with raw filter string '{{\"must\":[{{\"key\":\"ship_to_list\",\"match\":{{\"any\":[\"RU\"]}}}},{{\"key\":\"segment_ids\",\"match\":{{\"any\":[\"17647\"]}}}}]}}'");
+	}
 }

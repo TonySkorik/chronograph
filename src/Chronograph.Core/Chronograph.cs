@@ -466,6 +466,10 @@ public class Chronograph : IDisposable
 
             _actionDescription = _actionDescription.EscapeCurlyBraces();
 
+            string finalTemplate = (string.IsNullOrWhiteSpace(_endActionMessageTemplate)
+                ? $"Finished {_actionDescription}. [{{operationDuration}}]"
+                : $"Finished {_actionDescription}. {_endActionMessageTemplate}. [{{operationDuration}}]").EscapeCurlyBraces();
+
             WithParameter(OperationDurationMillisecondsLoggerParameterName, _stopwatch.Elapsed.TotalMilliseconds);
 
             bool isLongRunningOperation = 
@@ -494,10 +498,6 @@ public class Chronograph : IDisposable
                 actionDescriptionParameters.Add(elapsedString);
 
                 var actionDescriptionParameterArray = actionDescriptionParameters.ToArray();
-
-                string finalTemplate = string.IsNullOrWhiteSpace(_endActionMessageTemplate)
-                    ? $"Finished {_actionDescription}. [{{operationDuration}}]"
-                    : $"Finished {_actionDescription}. {_endActionMessageTemplate}. [{{operationDuration}}]";
 
                 _onEndAction?.Invoke(_stopwatch, actionDescriptionParameterArray);
 
