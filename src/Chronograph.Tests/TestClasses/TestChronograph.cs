@@ -58,6 +58,28 @@ public abstract class TestChronograph
     }
 
     [TestMethod]
+    public void TestSimpleOperationWithReportOverride()
+    {
+        var (chronograph, logger) = GetChronographAndLogger();
+
+        var chrono = chronograph
+            .For("test operation")
+            .Report("Test report testCount={testCounterValue}", () => 42)
+            .Start();
+
+        chrono.Report("Overridden report");
+        
+        chrono.Dispose();
+
+        logger.WrittenEvents.Should().HaveCount(2);
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started test operation"));
+        logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished test operation"));
+        
+        logger.WrittenEvents.Should().NotContain(m => m.message.Contains("testCount=42"));
+        logger.WrittenEvents.Should().Contain(m=> m.message.Contains("Overridden report"));
+    }
+
+    [TestMethod]
     public void TestSimpleOperationWithMultipleReports()
     {
         var (chronograph, logger) = GetChronographAndLogger();
