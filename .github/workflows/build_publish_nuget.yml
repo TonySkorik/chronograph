@@ -20,19 +20,24 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 10.0.x
+
     - name: Restore dependencies
       run: dotnet restore
+
     - name: Build
       run: dotnet build --configuration Release --no-restore
+
     - name: Get version
       id: get_version
       uses: battila7/get-version-action@v2
 
     - name: Pack project Chronograph.Core
       run: dotnet pack src/Chronograph.Core/Chronograph.Core.csproj --no-restore --no-build --configuration Release --include-symbols -p:PackageVersion=${{ steps.get_version.outputs.version-without-v }} --output ${{ env.PACKAGE_OUTPUT_DIRECTORY }}
+    
     - name: Pack project Chronograph.Microsoft.Extensions.Logging
       run: dotnet pack src/Chronograph.Microsoft.Extensions.Logging/Chronograph.Microsoft.Extensions.Logging.csproj --no-restore --no-build --configuration Release --include-symbols -p:PackageVersion=${{ steps.get_version.outputs.version-without-v }} --output ${{ env.PACKAGE_OUTPUT_DIRECTORY }}
+    
     - name: Pack project Chronograph.Serilog
       run: dotnet pack src/Chronograph.Serilog/Chronograph.Serilog.csproj --no-restore --no-build --configuration Release --include-symbols -p:PackageVersion=${{ steps.get_version.outputs.version-without-v }} --output ${{ env.PACKAGE_OUTPUT_DIRECTORY }}
 
