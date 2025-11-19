@@ -288,7 +288,7 @@ public abstract class TestChronograph
     }
 
     [TestMethod]
-    public async Task TestLongRunningOperationWithParametersWithSpecificMessage()
+    public async Task TestLongRunningOperationWithParametersWithSpecificMessage_AndEventLevelOverride()
     {
         var (chronograph, logger) = GetChronographAndLogger();
 
@@ -296,6 +296,7 @@ public abstract class TestChronograph
             .For("test operation {IntParameter}", 42)
             .WithLongRunningOperationReport(
                 TimeSpan.FromMilliseconds(1),
+                logEventLevel: ChronographLoggerEventLevel.Warning,
                 "Long running operation {LongParameter} detected",
                 1567L)
             .Start();
@@ -308,8 +309,10 @@ public abstract class TestChronograph
 
         logger.WrittenEvents.Should().Contain(m => m.message.Contains("Started test operation"));
         logger.WrittenEvents.Should().Contain(m => m.message.Contains("Finished test operation"));
-        logger.WrittenEvents.Should().Contain(
-            m => m.message.Contains("Long running operation 1567 detected"));
+        
+        logger.WrittenEvents.Should().Contain(m =>
+            m.message.Contains("Long running operation 1567 detected : ") // : for the elapsed time part
+            && m.level == ChronographLoggerEventLevel.Warning);
     }
 
     [TestMethod]

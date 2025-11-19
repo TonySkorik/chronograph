@@ -251,17 +251,26 @@ To do so use either of the `WithLongRunningOperationReport` builder method overl
 
 ```csharp
 Chronograph WithLongRunningOperationReport(
-    TimeSpan longRunningOperationThreshold, 
+    TimeSpan longRunningOperationThreshold,
+    string longRunningOperationReportMessage = null,
+    ChronographLoggerEventLevel logEventLevel = ChronographLoggerEventLevel.Information);
+        
+Chronograph WithLongRunningOperationReport(
+    TimeSpan longRunningOperationThreshold,
+    ChronographLoggerEventLevel logEventLevel = ChronographLoggerEventLevel.Information,
     string longRunningOperationReportMessage = null,
     params object[] longRunningOperationReportMessageParameters);
 
 Chronograph WithLongRunningOperationReport(
     TimeSpan longRunningOperationThreshold,
+    ChronographLoggerEventLevel logEventLevel = ChronographLoggerEventLevel.Information,
     string longRunningOperationReportMessage = null,
     params Func<object>[] longRunningOperationReportMessageParameterProviders);
 ```
 
 If you omit the `longRunningOperationReportMessage`, the standardised message will be written.
+
+If you provide the `longRunningOperationReportMessage`, it will be used and the `: [{Elapsed:g}]` part will be appended to it.
 
 ```csharp
 $"{specified action description here} took a long time to finish >({specified long running operation threshold here}) : [{Elapsed:g}]"

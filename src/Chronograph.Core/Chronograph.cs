@@ -47,6 +47,7 @@ public class Chronograph : IDisposable
     private string _longRunningOperationReportMessage;
     private object[] _longRunningOperationReportMessageParameters;
     private Func<object>[] _longRunningOperationReportMessageParameterProviders;
+    private ChronographLoggerEventLevel _longRunningOperationEventLevel = ChronographLoggerEventLevel.Information;
 
     private bool _wasEverStarted;
 
@@ -150,7 +151,7 @@ public class Chronograph : IDisposable
     /// <param name="countProviders">The count provider closures. Invoked upon operation completion.</param>
     /// <example>
     /// <c>
-    /// var targetDictionary = new Dictionary&lt;int,int&gt;();
+    /// Dictionary&lt;int,int&gt; targetDictionary = new();
     /// using(Log.CreateChronograph("operation description", "got dictionary entries from server {countParameter}", ()=>targetDictionary.Count)){
     ///		targetDictionary = GetDictionaryEntries();
     /// }
@@ -181,17 +182,20 @@ public class Chronograph : IDisposable
     /// Sets the chronograph <see cref="LongRunningOperationThreshold"/> to the specified value and enables long-running operation reporting.
     /// </summary>
     /// <param name="longRunningOperationThreshold">The exclusive threshold after which the operation is considered to be long-running.</param>
+    /// <param name="logEventLevel">Event level for long-running operation reporting.</param>
     /// <param name="longRunningOperationReportMessage">The optional long-running operation report message. If not provided, the default message will be used.</param>
     public Chronograph WithLongRunningOperationReport(
         TimeSpan longRunningOperationThreshold,
-        string longRunningOperationReportMessage = null)
+        string longRunningOperationReportMessage = null,
+        ChronographLoggerEventLevel logEventLevel = ChronographLoggerEventLevel.Information)
     {
         _longRunningOperationThreshold = longRunningOperationThreshold;
         _longRunningOperationReportMessage = longRunningOperationReportMessage;
+        _longRunningOperationEventLevel = logEventLevel;
 
         return this;
     }
-    
+
     /// <summary>
     /// Sets the chronograph <see cref="LongRunningOperationThreshold"/> to the specified value and enables long-running operation reporting.
     /// </summary>
@@ -199,11 +203,30 @@ public class Chronograph : IDisposable
     /// <param name="longRunningOperationReportMessage">The optional long-running operation report message. If not provided, the default message will be used.</param>
     /// <param name="longRunningOperationReportMessageParameters">The optional long-running operation report message parameters.</param>
     public Chronograph WithLongRunningOperationReport(
-        TimeSpan longRunningOperationThreshold, 
+        TimeSpan longRunningOperationThreshold,
+        string longRunningOperationReportMessage = null,
+        params object[] longRunningOperationReportMessageParameters)
+        =>
+            WithLongRunningOperationReport(
+                longRunningOperationThreshold,
+                ChronographLoggerEventLevel.Information,
+                longRunningOperationReportMessage,
+                longRunningOperationReportMessageParameters);
+
+    /// <summary>
+    /// Sets the chronograph <see cref="LongRunningOperationThreshold"/> to the specified value and enables long-running operation reporting.
+    /// </summary>
+    /// <param name="longRunningOperationThreshold">The exclusive threshold after which the operation is considered to be long-running.</param>
+    /// <param name="logEventLevel">Event level for long-running operation reporting.</param>
+    /// <param name="longRunningOperationReportMessage">The optional long-running operation report message. If not provided, the default message will be used.</param>
+    /// <param name="longRunningOperationReportMessageParameters">The optional long-running operation report message parameters.</param>
+    public Chronograph WithLongRunningOperationReport(
+        TimeSpan longRunningOperationThreshold,
+        ChronographLoggerEventLevel logEventLevel = ChronographLoggerEventLevel.Information,
         string longRunningOperationReportMessage = null,
         params object[] longRunningOperationReportMessageParameters)
     {
-        WithLongRunningOperationReport(longRunningOperationThreshold, longRunningOperationReportMessage);
+        WithLongRunningOperationReport(longRunningOperationThreshold, longRunningOperationReportMessage, logEventLevel);
         
         _longRunningOperationReportMessageParameters = longRunningOperationReportMessageParameters;
         
@@ -220,8 +243,27 @@ public class Chronograph : IDisposable
         TimeSpan longRunningOperationThreshold,
         string longRunningOperationReportMessage = null,
         params Func<object>[] longRunningOperationReportMessageParameterProviders)
+        =>
+            WithLongRunningOperationReport(
+                longRunningOperationThreshold,
+                ChronographLoggerEventLevel.Information,
+                longRunningOperationReportMessage,
+                longRunningOperationReportMessageParameterProviders);
+
+    /// <summary>
+    /// Sets the chronograph <see cref="LongRunningOperationThreshold"/> to the specified value and enables long-running operation reporting.
+    /// </summary>
+    /// <param name="longRunningOperationThreshold">The exclusive threshold after which the operation is considered to be long-running.</param>
+    /// <param name="logEventLevel">Event level for long-running operation reporting.</param>
+    /// <param name="longRunningOperationReportMessage">The optional long-running operation report message. If not provided, the default message will be used.</param>
+    /// <param name="longRunningOperationReportMessageParameterProviders">The optional long-running operation report message parameter providers.</param>
+    public Chronograph WithLongRunningOperationReport(
+        TimeSpan longRunningOperationThreshold,
+        ChronographLoggerEventLevel logEventLevel = ChronographLoggerEventLevel.Information,
+        string longRunningOperationReportMessage = null,
+        params Func<object>[] longRunningOperationReportMessageParameterProviders)
     {
-        WithLongRunningOperationReport(longRunningOperationThreshold, longRunningOperationReportMessage);
+        WithLongRunningOperationReport(longRunningOperationThreshold, longRunningOperationReportMessage, logEventLevel);
 
         _longRunningOperationReportMessageParameterProviders = longRunningOperationReportMessageParameterProviders;
 
@@ -515,10 +557,10 @@ public class Chronograph : IDisposable
                     var longRunningOperationReportTemplate =
                         string.IsNullOrEmpty(_longRunningOperationReportMessage)
                             ? $"{_actionDescription} took a long time to finish >({_longRunningOperationThreshold.Value!}) : [{Elapsed:g}]"
-                            : _longRunningOperationReportMessage;
+                            : $"{_longRunningOperationReportMessage} : [{Elapsed:g}]";
                         
                     _logger.Write(
-                        _eventLevel,
+                        _longRunningOperationEventLevel,
                         longRunningOperationReportTemplate,
                         GetLongRunningOperationReportMessageParameters(actionDescriptionParameterArray));
                 }
